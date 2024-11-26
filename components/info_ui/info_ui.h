@@ -1,18 +1,16 @@
-#ifndef INFO_UI_H_
-#define INFO_UI_H_
+#pragma once
+#include "info_ui_config.h"
 
 namespace info_ui{
     
-struct info_ui_config_t {
-     
-};
-
 class info_ui {
-    info_ui(info_ui_config_t config);
+public:
+    info_ui(info_ui_config_t* cfg);
+    void start(void);
     ~info_ui(void);
+private:
+    info_ui_config_t* cfg;              // 屏幕的配置信息
 };
-
 
 }
 
-#endif
