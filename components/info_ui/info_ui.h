@@ -1,5 +1,6 @@
 #pragma once
 #include "info_ui_config.h"
+#include "info_ui_camera.h"
 #include <string>
 
 namespace info_ui{
@@ -12,7 +13,7 @@ public:
     void update();
     ~info_ui(void);
 private:
-    static void _dropdown_info_anim_ready_cb(lv_anim_t* a);
+    static void _dropdown_info_anim_deleted_cb(lv_anim_t* a);
 
 public:
 private:
@@ -21,7 +22,6 @@ private:
     lv_obj_t*           _layer_top;         // 顶层
 
     lv_obj_t*           _layer_pop;         // 信息弹窗层
-    // static bool         _dropdown_anim_finish_flag;
 };
 
 }

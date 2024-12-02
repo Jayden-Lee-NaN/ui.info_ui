@@ -12,7 +12,7 @@
 namespace info_ui {
 
 static bool _dropdown_anim_finish_flag = false;
-void info_ui::_dropdown_info_anim_ready_cb(lv_anim_t* a) {
+void info_ui::_dropdown_info_anim_deleted_cb(lv_anim_t* a) {
     _dropdown_anim_finish_flag = true;
 }
 
@@ -43,6 +43,11 @@ info_ui::info_ui(info_ui_config_t* cfg) {
     // this->_layer_top = lv_layer_top();
 }
 
+/*
+ * @brief               弹出指定的信息
+ * @param info          需要显示的信息
+ * @return              无
+ */
 void info_ui::popup_info(std::string info) {
 
     // lv_obj_t* layer = lv_disp_get_scr_act(this->_disp);
@@ -77,6 +82,10 @@ void info_ui::popup_info(std::string info) {
     lv_anim_start(&anim);
 }
 
+/*
+ * @brief               收回弹窗
+ * @return              无
+ */
 void info_ui::dropdown_info() {
     //------------------------------初始化弹窗动画------------------------------
     lv_anim_t anim;
@@ -88,8 +97,7 @@ void info_ui::dropdown_info() {
     lv_anim_set_time(&anim, 500);                // 动画时长 500 ms
     lv_anim_set_exec_cb(&anim, (lv_anim_exec_xcb_t)lv_obj_set_y);
     lv_anim_set_path_cb(&anim, lv_anim_path_ease_out);
-    // lv_anim_set_ready_cb(&anim, _dropdown_info_anim_ready_cb);
-    lv_anim_set_deleted_cb(&anim, _dropdown_info_anim_ready_cb);
+    lv_anim_set_deleted_cb(&anim, _dropdown_info_anim_deleted_cb);
 
     //------------------------------启动动画------------------------------
     lv_anim_start(&anim);
