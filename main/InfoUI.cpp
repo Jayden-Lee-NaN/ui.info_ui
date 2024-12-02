@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string>
 
 #include "core/lv_obj_pos.h"
 #include "esp_lcd_types.h"
@@ -11,6 +12,7 @@
 #include "driver/i2c.h"
 #include "misc/lv_anim.h"
 #include "misc/lv_area.h"
+#include "driver/gpio.h"
 
 //------------------------------LOG参数设置------------------------------
 static const char* TAG = "TEST";
@@ -139,7 +141,8 @@ extern "C" void app_main(void)
 
     //------------------------------初始化info ui------------------------------
     info_ui::info_ui_config_t info_ui_cfg = {
-        .disp_cfg = &disp_cfg,
+        .io_handle = io_handle,
+        .panel_handle = panel_handle,
         .disp_width = TEST_LCD_V_RES,
         .disp_height = TEST_LCD_H_RES,
     };
@@ -147,17 +150,47 @@ extern "C" void app_main(void)
     
     //------------------------------显示滚动字符------------------------------
     ESP_LOGI(TAG, "Display LVGL Scroll Text");
+    lv_obj_t* obj = NULL;
 
-    uint32_t cnt = 0;
+    //------------------------------初始化GPIO------------------------------
+    gpio_config_t io_cfg;
+    io_cfg.intr_type = GPIO_INTR_DISABLE;               // 禁止中断
+    io_cfg.mode = GPIO_MODE_INPUT;                      // 选择输入模式
+    io_cfg.pull_up_en = GPIO_PULLUP_DISABLE;            // 禁止上拉
+    io_cfg.pull_down_en = GPIO_PULLDOWN_DISABLE;        // 禁止下拉
+    //------------------------------初始化IO-46------------------------------
+    io_cfg.pin_bit_mask = (1ULL << 46);                 // 选择引脚
+    gpio_config(&io_cfg);
 
+    //------------------------------初始化IO-9------------------------------
+    io_cfg.pin_bit_mask = (1ULL << 9);                 // 选择引脚
+    gpio_config(&io_cfg);
+
+
+    int pin_46_level = 0;
+    int last_pin_46_level = 0;
+    int pin_9_level = 0;
+    int last_pin_9_level = 0;
     while (1) {
-        if (cnt < 10) {
+        pin_46_level = gpio_get_level(GPIO_NUM_46);
+        pin_9_level = gpio_get_level(GPIO_NUM_9);
+
+        if (pin_46_level == 1 && last_pin_46_level == 0) {
             if (lvgl_port_lock(0)) {
-                popup_window(disp);
-                cnt ++;
+                obj = ui.pop_info(std::string("Hello JaydenLee"));
                 lvgl_port_unlock();
             }
         }
-        vTaskDelay(pdMS_TO_TICKS(2000));
+
+        if (pin_9_level == 1 && last_pin_9_level == 0) {
+            if (obj != NULL && lvgl_port_lock(0)) {
+                lv_obj_clean(obj);
+                obj = NULL;
+                lvgl_port_unlock();
+            }
+        }
+        last_pin_46_level = pin_46_level;
+        last_pin_9_level = pin_9_level;
+        vTaskDelay(pdMS_TO_TICKS(1000));
     }
 }
