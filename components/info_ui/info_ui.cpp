@@ -6,12 +6,14 @@
 
 #include <stdio.h>
 #include "info_ui.h"
+#include "core/lv_disp.h"
 #include <string>
 
 namespace info_ui {
 
-static void _pop_info_anim_ready_cb(lv_anim_t* a) {
-    lv_obj_del((lv_obj_t*)a->var);
+static bool _dropdown_anim_finish_flag = false;
+void info_ui::_dropdown_info_anim_ready_cb(lv_anim_t* a) {
+    _dropdown_anim_finish_flag = true;
 }
 
 info_ui::info_ui(info_ui_config_t* cfg) {
@@ -35,20 +37,23 @@ info_ui::info_ui(info_ui_config_t* cfg) {
     };
     this->_disp = lvgl_port_add_disp(&disp_cfg);
     lv_disp_set_rotation(this->_disp, LV_DISP_ROT_180);
+
+    //------------------------------获取屏幕------------------------------
+    this->_layer_pop = NULL;
+    // this->_layer_top = lv_layer_top();
 }
 
-lv_obj_t* info_ui::pop_info(std::string info) {
-    
-    //------------------------------获取屏幕------------------------------
-    lv_obj_t* popup = lv_disp_get_scr_act(this->_disp);
-    lv_obj_set_size(popup, this->_cfg->disp_height * 0.5, this->_cfg->disp_width * 0.5);
-    lv_obj_align(popup, LV_ALIGN_CENTER, 0, 0);
-    
-    static lv_style_t style;
-    lv_style_init(&style);
+void info_ui::popup_info(std::string info) {
 
+    // lv_obj_t* layer = lv_disp_get_scr_act(this->_disp);
+    this->_layer_pop = lv_disp_get_scr_act(this->_disp);
 
-    lv_obj_t* label = lv_label_create(popup);
+    //------------------------------设置弹窗的基本属性------------------------------
+    lv_obj_set_size(this->_layer_pop, this->_cfg->disp_height * 0.5, this->_cfg->disp_width * 0.5);
+    lv_obj_align(this->_layer_pop, LV_ALIGN_CENTER, 0, 0);
+
+    //------------------------------设置文字------------------------------
+    lv_obj_t* label = lv_label_create(this->_layer_pop);
     lv_label_set_long_mode(label, LV_LABEL_LONG_SCROLL_CIRCULAR);
     lv_obj_set_width(label, this->_cfg->disp_height - 20);
     lv_label_set_text(label, info.c_str());
@@ -57,22 +62,53 @@ lv_obj_t* info_ui::pop_info(std::string info) {
     lv_obj_set_style_border_width(label, 2, LV_PART_MAIN);
     lv_obj_set_style_pad_all(label, 5, LV_PART_MAIN);
 
-    //------------------------------创建动画------------------------------
+    //------------------------------初始化弹窗动画------------------------------
     lv_anim_t anim;
     lv_anim_init(&anim);
-    lv_anim_set_var(&anim, popup);
+    lv_anim_set_var(&anim, this->_layer_pop);
 
     lv_anim_set_values(&anim, this->_cfg->disp_width, 0);
-    
-    lv_anim_set_time(&anim, 500);       // 动画市场500ms
+
+    lv_anim_set_time(&anim, 500);                // 动画时长 500 ms
     lv_anim_set_exec_cb(&anim, (lv_anim_exec_xcb_t)lv_obj_set_y);
     lv_anim_set_path_cb(&anim, lv_anim_path_ease_out);
 
-    // lv_anim_set_ready_cb(&anim, _pop_info_anim_ready_cb);
-
+    //------------------------------启动动画------------------------------
     lv_anim_start(&anim);
+}
 
-    return popup;
+void info_ui::dropdown_info() {
+    //------------------------------初始化弹窗动画------------------------------
+    lv_anim_t anim;
+    lv_anim_init(&anim);
+    lv_anim_set_var(&anim, this->_layer_pop);
+
+    lv_anim_set_values(&anim, 0, this->_cfg->disp_width);
+
+    lv_anim_set_time(&anim, 500);                // 动画时长 500 ms
+    lv_anim_set_exec_cb(&anim, (lv_anim_exec_xcb_t)lv_obj_set_y);
+    lv_anim_set_path_cb(&anim, lv_anim_path_ease_out);
+    // lv_anim_set_ready_cb(&anim, _dropdown_info_anim_ready_cb);
+    lv_anim_set_deleted_cb(&anim, _dropdown_info_anim_ready_cb);
+
+    //------------------------------启动动画------------------------------
+    lv_anim_start(&anim);
+    _dropdown_anim_finish_flag = false;
+}
+
+/*
+ * @brief               放在主循环中,做标志位的处理
+ * @return              无
+ */
+void info_ui::update() {
+    if (_dropdown_anim_finish_flag == true) {
+        if (lvgl_port_lock(0)) {
+            _dropdown_anim_finish_flag = false;
+            lv_obj_clean(this->_layer_pop);
+            this->_layer_pop = NULL;
+            lvgl_port_unlock();
+        }
+    }
 }
 
 info_ui::~info_ui(void) {

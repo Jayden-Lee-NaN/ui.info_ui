@@ -150,7 +150,6 @@ extern "C" void app_main(void)
     
     //------------------------------显示滚动字符------------------------------
     ESP_LOGI(TAG, "Display LVGL Scroll Text");
-    lv_obj_t* obj = NULL;
 
     //------------------------------初始化GPIO------------------------------
     gpio_config_t io_cfg;
@@ -177,20 +176,20 @@ extern "C" void app_main(void)
 
         if (pin_46_level == 1 && last_pin_46_level == 0) {
             if (lvgl_port_lock(0)) {
-                obj = ui.pop_info(std::string("Hello JaydenLee"));
+                ui.popup_info(std::string("Hello JaydenLee"));
                 lvgl_port_unlock();
             }
         }
 
         if (pin_9_level == 1 && last_pin_9_level == 0) {
-            if (obj != NULL && lvgl_port_lock(0)) {
-                lv_obj_clean(obj);
-                obj = NULL;
+            if (lvgl_port_lock(0)) {
+                ui.dropdown_info();
                 lvgl_port_unlock();
             }
         }
         last_pin_46_level = pin_46_level;
         last_pin_9_level = pin_9_level;
-        vTaskDelay(pdMS_TO_TICKS(1000));
+        ui.update();
+        vTaskDelay(pdMS_TO_TICKS(500));
     }
 }
