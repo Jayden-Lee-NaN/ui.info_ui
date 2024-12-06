@@ -18,3 +18,5 @@ dependencies:
     version: "^2.4.2"
   lvgl/lvgl:
     version: "^8"
+  espressif/button:
+    version: "^3"

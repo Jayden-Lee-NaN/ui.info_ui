@@ -9,10 +9,10 @@ file (GLOB CONFIG_SOURCES
     "config/Src/*.c"
 )
 
-file (GLOB DRIVER_SOURCES
-    "driver/Src/*.cpp"
-    "driver/Src/*.c"
-)
+# file (GLOB DRIVER_SOURCES
+#     "driver/Src/*.cpp"
+#     "driver/Src/*.c"
+# )
 
 file (GLOB APP_SOURCES
     "app/sys_info/Src/*.c"
@@ -27,14 +27,14 @@ idf_component_register(
     SRCS 
         ${UTILITY_SOURCE} 
         ${CONFIG_SOURCES}
-        ${DRIVER_SOURCES}
+        # ${DRIVER_SOURCES}
         ${APP_SOURCES}
         ${APP_ICON}
         "./info_ui.cpp"
     INCLUDE_DIRS 
         "ui/Inc"
         "config/Inc"
-        "driver/Inc"
+        # "driver/Inc"
         "app/sys_info/Inc"
         "."
 )

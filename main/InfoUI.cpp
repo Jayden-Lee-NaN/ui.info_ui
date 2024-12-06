@@ -13,6 +13,7 @@
 #include "misc/lv_anim.h"
 #include "misc/lv_area.h"
 #include "driver/gpio.h"
+#include "iot_button.h"
 
 //------------------------------LOG参数设置------------------------------
 static const char* TAG = "TEST";
@@ -42,35 +43,16 @@ void test_lvgl_demo_ui(lv_disp_t* disp) {
     lv_obj_align(label, LV_ALIGN_CENTER, 0, 0);
 }
 
-void popup_window(lv_disp_t* disp) {
-    lv_obj_t* popup = lv_disp_get_scr_act(disp);
-    lv_obj_set_size(popup, TEST_LCD_H_RES * 0.5, TEST_LCD_V_RES * 0.5);
-    lv_obj_align(popup, LV_ALIGN_CENTER, 0, 0);
-    
-    static lv_style_t style;
-    lv_style_init(&style);
-
-
-    lv_obj_t* label = lv_label_create(popup);
-    lv_label_set_text(label, "FBI Warning!");
-    lv_obj_align(label, LV_ALIGN_CENTER, 0, 0);
-
-    lv_obj_set_style_border_width(label, 2, LV_PART_MAIN);
-    lv_obj_set_style_pad_all(label, 5, LV_PART_MAIN);
-
-    //------------------------------创建动画------------------------------
-    lv_anim_t anim;
-    lv_anim_init(&anim);
-    lv_anim_set_var(&anim, popup);
-
-    lv_anim_set_values(&anim, TEST_LCD_V_RES, 0);
-    
-    lv_anim_set_time(&anim, 500);       // 动画市场500ms
-    lv_anim_set_exec_cb(&anim, (lv_anim_exec_xcb_t)lv_obj_set_y);
-    lv_anim_set_path_cb(&anim, lv_anim_path_ease_out);
-    lv_anim_start(&anim);
+static void button_49_cb(void* arg, void* usr_data) {
+    info_ui::info_ui* ui = (info_ui::info_ui*)usr_data;
+    ui->popup_info("Hello World");
 }
 
+static void button_37_cb(void* arg, void* usr_data) {
+    info_ui::info_ui* ui = (info_ui::info_ui*)usr_data;
+    ui->popup_info("Hello JaydenLee");
+    // ui->dropdown_info();
+}
 
 extern "C" void app_main(void)
 {
@@ -148,48 +130,42 @@ extern "C" void app_main(void)
     };
     info_ui::info_ui ui(&info_ui_cfg);
     
-    //------------------------------显示滚动字符------------------------------
-    ESP_LOGI(TAG, "Display LVGL Scroll Text");
+    //------------------------------添加button------------------------------
+    button_config_t gpio_btn_cfg[] = {
+        {
+            .type = BUTTON_TYPE_GPIO,
+            .long_press_time = CONFIG_BUTTON_PERIOD_TIME_MS,
+            .short_press_time = CONFIG_BUTTON_SHORT_PRESS_TIME_MS,
+            .gpio_button_config = {
+                .gpio_num = 40,
+                .active_level = 0,
+            },
+        },
+        {
+            .type = BUTTON_TYPE_GPIO,
+            .long_press_time = CONFIG_BUTTON_PERIOD_TIME_MS,
+            .short_press_time = CONFIG_BUTTON_SHORT_PRESS_TIME_MS,
+            .gpio_button_config = {
+                .gpio_num = 37,
+                .active_level = 0,
+            },
+        },
+    };
 
-    //------------------------------初始化GPIO------------------------------
-    gpio_config_t io_cfg;
-    io_cfg.intr_type = GPIO_INTR_DISABLE;               // 禁止中断
-    io_cfg.mode = GPIO_MODE_INPUT;                      // 选择输入模式
-    io_cfg.pull_up_en = GPIO_PULLUP_DISABLE;            // 禁止上拉
-    io_cfg.pull_down_en = GPIO_PULLDOWN_DISABLE;        // 禁止下拉
-    //------------------------------初始化IO-46------------------------------
-    io_cfg.pin_bit_mask = (1ULL << 46);                 // 选择引脚
-    gpio_config(&io_cfg);
-
-    //------------------------------初始化IO-9------------------------------
-    io_cfg.pin_bit_mask = (1ULL << 9);                 // 选择引脚
-    gpio_config(&io_cfg);
-
-
-    int pin_46_level = 0;
-    int last_pin_46_level = 0;
-    int pin_9_level = 0;
-    int last_pin_9_level = 0;
-    while (1) {
-        pin_46_level = gpio_get_level(GPIO_NUM_46);
-        pin_9_level = gpio_get_level(GPIO_NUM_9);
-
-        if (pin_46_level == 1 && last_pin_46_level == 0) {
-            if (lvgl_port_lock(0)) {
-                ui.popup_info(std::string("Hello JaydenLee"));
-                lvgl_port_unlock();
-            }
-        }
-
-        if (pin_9_level == 1 && last_pin_9_level == 0) {
-            if (lvgl_port_lock(0)) {
-                ui.dropdown_info();
-                lvgl_port_unlock();
-            }
-        }
-        last_pin_46_level = pin_46_level;
-        last_pin_9_level = pin_9_level;
-        ui.update();
-        vTaskDelay(pdMS_TO_TICKS(500));
+    button_handle_t gpio_49_btn = iot_button_create(&gpio_btn_cfg[0]);
+    if (NULL == gpio_49_btn) {
+        ESP_LOGE(TAG, "Button create failed");
     }
+    iot_button_register_cb(gpio_49_btn, BUTTON_PRESS_DOWN, button_49_cb, &ui);
+
+    button_handle_t gpio_37_btn = iot_button_create(&gpio_btn_cfg[1]);
+    if (NULL == gpio_37_btn) {
+        ESP_LOGE(TAG, "Button create failed");
+    }
+    iot_button_register_cb(gpio_37_btn, BUTTON_PRESS_DOWN, button_37_cb, &ui);
+
+    while (1) {
+        vTaskDelay(pdMS_TO_TICKS(1000));
+    }
+
 }
