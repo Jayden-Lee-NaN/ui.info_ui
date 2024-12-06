@@ -51,7 +51,6 @@ static void button_49_cb(void* arg, void* usr_data) {
 static void button_37_cb(void* arg, void* usr_data) {
     info_ui::info_ui* ui = (info_ui::info_ui*)usr_data;
     ui->popup_info("Hello JaydenLee");
-    // ui->dropdown_info();
 }
 
 extern "C" void app_main(void)
@@ -128,41 +127,10 @@ extern "C" void app_main(void)
         .disp_width = TEST_LCD_V_RES,
         .disp_height = TEST_LCD_H_RES,
     };
-    info_ui::info_ui ui(&info_ui_cfg);
-    
-    //------------------------------添加button------------------------------
-    button_config_t gpio_btn_cfg[] = {
-        {
-            .type = BUTTON_TYPE_GPIO,
-            .long_press_time = CONFIG_BUTTON_PERIOD_TIME_MS,
-            .short_press_time = CONFIG_BUTTON_SHORT_PRESS_TIME_MS,
-            .gpio_button_config = {
-                .gpio_num = 40,
-                .active_level = 0,
-            },
-        },
-        {
-            .type = BUTTON_TYPE_GPIO,
-            .long_press_time = CONFIG_BUTTON_PERIOD_TIME_MS,
-            .short_press_time = CONFIG_BUTTON_SHORT_PRESS_TIME_MS,
-            .gpio_button_config = {
-                .gpio_num = 37,
-                .active_level = 0,
-            },
-        },
-    };
+    info_ui::info_ui ui(&info_ui_cfg, 35, 40, 37);
 
-    button_handle_t gpio_49_btn = iot_button_create(&gpio_btn_cfg[0]);
-    if (NULL == gpio_49_btn) {
-        ESP_LOGE(TAG, "Button create failed");
-    }
-    iot_button_register_cb(gpio_49_btn, BUTTON_PRESS_DOWN, button_49_cb, &ui);
-
-    button_handle_t gpio_37_btn = iot_button_create(&gpio_btn_cfg[1]);
-    if (NULL == gpio_37_btn) {
-        ESP_LOGE(TAG, "Button create failed");
-    }
-    iot_button_register_cb(gpio_37_btn, BUTTON_PRESS_DOWN, button_37_cb, &ui);
+    ui.test_button_input();
+    // ui.test_show_image();
 
     while (1) {
         vTaskDelay(pdMS_TO_TICKS(1000));
