@@ -129,7 +129,7 @@ extern "C" void app_main(void)
     };
     info_ui::info_ui ui(&info_ui_cfg, 35, 40, 37);
 
-    ui.test_button_input();
+    // ui.test_button_input();
     // ui.test_show_image();
 
     while (1) {
