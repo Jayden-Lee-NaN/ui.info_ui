@@ -82,7 +82,7 @@ info_ui::info_ui(info_ui_config_t* cfg, int32_t button_prev_num, int32_t button_
     //------------------------------获取屏幕------------------------------
     this->_layer = lv_disp_get_scr_act(this->_disp);
     this->_top = lv_disp_get_layer_top(this->_disp);
-    lv_obj_set_flex_flow(this->_layer, LV_FLEX_FLOW_ROW);
+    // lv_obj_set_flex_flow(this->_layer, LV_FLEX_FLOW_ROW);
     // lv_obj_set_flex_align(this->_layer, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
 
     //------------------------------设置info label------------------------------
@@ -200,6 +200,9 @@ extern "C" void info_ui::test_button_input() {
     LV_IMG_DECLARE(icon_windows);
     // LV_IMG_DECLARE(icon_windows_right);
     
+    LV_IMG_DECLARE(icon_cpu);
+    LV_IMG_DECLARE(icon_information);
+    LV_IMG_DECLARE(icon_music);
 
     
     void* img_src[] = {
@@ -209,17 +212,39 @@ extern "C" void info_ui::test_button_input() {
         (void*)&icon_windows,
     };
 
+    // void* img_src[] = {
+    //     (void*)&icon_cpu,
+    //     (void*)&icon_information,
+    //     (void*)&icon_music,
+    // };
     lv_obj_t* panel = lv_obj_create(this->_layer);
     lv_obj_set_size(panel, 128, 64);
     lv_obj_set_scroll_snap_x(panel, LV_SCROLL_SNAP_CENTER);
+    lv_obj_set_scrollbar_mode(panel, LV_SCROLLBAR_MODE_OFF);
     lv_obj_set_flex_flow(panel, LV_FLEX_FLOW_ROW);
-    lv_obj_align(panel, LV_ALIGN_CENTER, 0, 20);
+    lv_obj_set_flex_align(panel, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+    lv_obj_align(panel, LV_ALIGN_CENTER, 0, 0);
+
+    static lv_style_t style_focused;
+    lv_style_init(&style_focused);
+    lv_style_set_border_width(&style_focused, 1);
+    lv_style_set_border_color(&style_focused, lv_color_hex(0));
+    lv_style_set_border_post(&style_focused, true);
+    lv_style_set_radius(&style_focused, 10);
+
 
     for (int i = 0; i < 4; ++i) {
-        lv_obj_t* img = lv_img_create(panel);
+        lv_obj_t* btn = lv_btn_create(panel);
+        lv_obj_set_size(btn, 60, 60);
+        lv_obj_center(btn);
+        lv_obj_add_style(btn, &style_focused, LV_STATE_FOCUSED);
+
+        lv_obj_t* img = lv_img_create(btn);
         lv_img_set_src(img, img_src[i]);
-        lv_obj_set_size(img, 64, 64);
-        lv_obj_center(img);
+        lv_obj_set_size(img, 56, 56);
+        lv_obj_align(img, LV_ALIGN_CENTER, 0, 0);
+
+        lv_group_add_obj(this->_button_group, btn);
         // lv_obj_align(img, LV_ALIGN_CENTER, 0, 0);
 
         // static lv_style_t style_normal;
@@ -237,7 +262,6 @@ extern "C" void info_ui::test_button_input() {
 
         // lv_group_add_obj(this->_button_group, wrapper);
     }
-    lv_group_add_obj(this->_button_group, panel);
     lv_obj_update_snap(panel, LV_ANIM_ON);
 
     // lv_obj_t* _icon_message = lv_img_create(wrapper);
