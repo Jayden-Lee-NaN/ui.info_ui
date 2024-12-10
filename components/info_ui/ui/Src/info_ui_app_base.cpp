@@ -1,17 +1,15 @@
 #include "info_ui_app_base.h"
 
 void info_ui::info_ui_app_base::entry() {
-    // 进入到指定的APP面板
     lvgl_port_lock(0);
     lv_obj_move_foreground(this->_app_panel);
     lvgl_port_unlock();
 }
-
-void info_ui::info_ui_app_base::popup_info() {
+void info_ui::info_ui_app_base::popup_info(std::string info) {
     lvgl_port_lock(0);
 
     //------------------------------设置文字------------------------------
-    lv_label_set_text(this->_app_info_label, "No App");
+    lv_label_set_text(this->_app_info_label, info.c_str());
 
     //------------------------------初始化弹窗动画------------------------------
     lv_anim_t anim;

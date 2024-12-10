@@ -19,22 +19,26 @@
 
 namespace info_ui {
 
-static lv_style_t   _app_selected_style;    // 软件图标被选择的样式
+static lv_style_t           _app_selected_style;    // 软件图标被选择的样式
+//------------------------------当前所在的页面------------------------------
+static info_ui_page         _sys_page = INFO_UI_PAGE_HOME;      // 系统当前所在的页面
+
+//------------------------------当前所运行的软件------------------------------
+static void*                _app_running = NULL;   // 正在运行的app指针
+static info_ui_app_load_fsm _app_load_fsm = INFO_UI_APP_DEFAULT;  // app加载FSM
 
 static void app_selected_button_cb(lv_event_t* e) {
     lv_event_code_t code = lv_event_get_code(e);
-    if (code == LV_EVENT_CLICKED) {
-        info_ui_app_base* app = (info_ui_app_base*)lv_event_get_user_data(e);
-        printf("Hello World!\n");
-        if (app->is_app_available()) {
-            printf("No App\n");
+    //------------------------------在主页面做的事------------------------------
+    
+    if (_sys_page == INFO_UI_PAGE_HOME) {
+        if (code == LV_EVENT_CLICKED) {
+            _app_running = lv_event_get_user_data(e);  
+            _app_load_fsm = INFO_UI_APP_LOADING;
         }
     }
 }
 
-static void sys_info_label_cb(lv_event_t* e) {
-
-}
 
 info_ui::info_ui(info_ui_config_t* cfg, int32_t button_prev_num, int32_t button_next_num, int32_t button_enter_num) {
     //------------------------------挂载数据------------------------------
@@ -136,8 +140,6 @@ info_ui::info_ui(info_ui_config_t* cfg, int32_t button_prev_num, int32_t button_
     lv_obj_set_size(this->_app_panel_layer, 128, 64);
     lv_obj_align(this->_app_panel_layer, LV_ALIGN_CENTER, 0, 0);
 
-    lv_group_add_obj(this->_button_group, this->_app_select_layer);
-    
     //------------------------------注册软件------------------------------
     app_sys_info sys_info(this->_cfg->disp_width, this->_cfg->disp_height);
     this->app_register((info_ui_app_base*)&sys_info);
@@ -150,6 +152,7 @@ info_ui::info_ui(info_ui_config_t* cfg, int32_t button_prev_num, int32_t button_
 
     app_temperature temperature(this->_cfg->disp_width, this->_cfg->disp_height);
     this->app_register((info_ui_app_base*)&temperature);
+
 }
 
 /*
@@ -210,17 +213,6 @@ void info_ui::start() {
     lvgl_port_unlock();
 }
 
-/*
- * @brief               放在主循环中,做标志位的处理
- * @return              无
- */
-void info_ui::update() {
-        if (lvgl_port_lock(0)) {
-            // TODO:tbd
-            lvgl_port_unlock();
-        }
-        vTaskDelay(pdMS_TO_TICKS(1));
-}
 
 void info_ui::app_register(info_ui_app_base* app) {
     lvgl_port_lock(0);
@@ -232,7 +224,7 @@ void info_ui::app_register(info_ui_app_base* app) {
     
     lv_obj_add_flag(btn, LV_OBJ_FLAG_CLICKABLE);
 
-    lv_obj_add_event_cb(btn, app_selected_button_cb, LV_EVENT_ALL, app);
+    lv_obj_add_event_cb(btn, app_selected_button_cb, LV_EVENT_CLICKED, app);
 
     //------------------------------添加图标------------------------------
     lv_obj_t* icon = lv_img_create(btn);
@@ -252,6 +244,31 @@ void info_ui::app_register(info_ui_app_base* app) {
     lv_obj_update_snap(this->_app_select_layer, LV_ANIM_ON);
 
     lvgl_port_unlock();
+}
+
+/*
+ * @brief               放在主循环中,做标志位的处理
+ * @return              无
+ */
+void info_ui::update() {
+        if (lvgl_port_lock(0)) {
+            if (_sys_page == INFO_UI_PAGE_HOME) {
+                if (_app_load_fsm == INFO_UI_APP_LOADING) {
+                    info_ui_app_base* app = (info_ui_app_base*)_app_running;
+                    if (app->is_app_available()) {
+                        _app_load_fsm = INFO_UI_APP_LOAD_FINISH;
+                        _sys_page = INFO_UI_PAGE_APP;
+                        app->entry();
+                    }
+                    else {
+                        app->popup_info("No app");
+                        _app_load_fsm = INFO_UI_APP_LOAD_ERROR; 
+                    }
+                }
+            }
+            lvgl_port_unlock();
+        }
+        vTaskDelay(pdMS_TO_TICKS(1));
 }
 
 }

@@ -29,7 +29,7 @@ file (GLOB APP_ICON
 
 idf_component_register(
     SRCS 
-        ${UTILITY_SOURCE} 
+        ${UI_SOURCES} 
         ${CONFIG_SOURCES}
         ${APP_SOURCES}
         ${APP_ICON}
