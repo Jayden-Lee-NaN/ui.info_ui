@@ -14,11 +14,17 @@ file (GLOB APP_SOURCES
     "app/sys_info/Src/*.cpp"
     "app/music/Src/*.c"
     "app/music/Src/*.cpp"
+    "app/imu/Src/*.c"
+    "app/imu/Src/*.cpp"
+    "app/temperature/Src/*.c"
+    "app/temperature/Src/*.cpp"
 ) 
 
 file (GLOB APP_ICON
     "app/sys_info/Icon/*.c"
     "app/music/Icon/*.c"
+    "app/imu/Icon/*.c"
+    "app/temperature/Icon/*.c"
 )
 
 idf_component_register(
@@ -33,6 +39,8 @@ idf_component_register(
         "config/Inc"
         "app/sys_info/Inc"
         "app/music/Inc"
+        "app/imu/Inc"
+        "app/temperature/Inc"
         "."
 )
 set(CMAKE_EXPORT_COMPILE_COMMANDS 1)

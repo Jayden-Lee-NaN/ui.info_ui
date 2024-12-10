@@ -11,6 +11,7 @@ public:
 
     void popup_info(std::string info);
     void dropdown_info();
+    void start();
     void update();
     void test_button_input();
     ~info_ui(void);
@@ -32,6 +33,8 @@ private:
 
     //------------------------------软件相关配置------------------------------
     lv_obj_t*           _app_select_layer;      // 软件选择层
+    lv_obj_t*           _app_panel_layer;       // 软件层的头
+    
 };
 
 }

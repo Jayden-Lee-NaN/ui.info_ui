@@ -128,9 +128,7 @@ extern "C" void app_main(void)
         .disp_height = TEST_LCD_H_RES,
     };
     info_ui::info_ui ui(&info_ui_cfg, 35, 40, 37);
-
-    // ui.test_button_input();
-    // ui.test_show_image();
+    ui.start();
 
     while (1) {
         vTaskDelay(pdMS_TO_TICKS(1000));

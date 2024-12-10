@@ -8,10 +8,10 @@ namespace info_ui {
 
 class app_sys_info : public info_ui_app_base {
 public:
-    app_sys_info();
-
+    app_sys_info(uint32_t disp_width, uint32_t disp_height);
+    void run() override;
 private:
-    // std::vector<void*> _authors_list;
+    void* _author_img;
 };
 
 }

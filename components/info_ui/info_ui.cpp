@@ -5,19 +5,36 @@
 //------------------------------------------------------------
 
 #include <stdio.h>
+#include <string>
 #include "info_ui.h" 
 #include "core/lv_disp.h"
 #include "core/lv_event.h"
 #include "core/lv_obj_scroll.h"
 #include "esp_lvgl_port_button.h"
 #include "extra/widgets/imgbtn/lv_imgbtn.h"
-#include <string>
 #include "app_sys_info.h"
 #include "app_music.h"
+#include "app_imu.h"
+#include "app_temperature.h"
 
 namespace info_ui {
 
 static lv_style_t   _app_selected_style;    // 软件图标被选择的样式
+
+static void app_selected_button_cb(lv_event_t* e) {
+    lv_event_code_t code = lv_event_get_code(e);
+    if (code == LV_EVENT_CLICKED) {
+        info_ui_app_base* app = (info_ui_app_base*)lv_event_get_user_data(e);
+        printf("Hello World!\n");
+        if (app->is_app_available()) {
+            printf("No App\n");
+        }
+    }
+}
+
+static void sys_info_label_cb(lv_event_t* e) {
+
+}
 
 info_ui::info_ui(info_ui_config_t* cfg, int32_t button_prev_num, int32_t button_next_num, int32_t button_enter_num) {
     //------------------------------挂载数据------------------------------
@@ -81,6 +98,7 @@ info_ui::info_ui(info_ui_config_t* cfg, int32_t button_prev_num, int32_t button_
         .button_enter = &button_config[2],
     };
     this->_button_handle = lvgl_port_add_navigation_buttons(&btns);
+
     this->_button_group = lv_group_create();
     lv_indev_set_group(this->_button_handle, this->_button_group);
 
@@ -113,12 +131,25 @@ info_ui::info_ui(info_ui_config_t* cfg, int32_t button_prev_num, int32_t button_
     lv_style_set_border_post(&_app_selected_style, true);
     lv_style_set_radius(&_app_selected_style, 10);
 
+    //------------------------------配置软件面板层------------------------------
+    this->_app_panel_layer = lv_obj_create(this->_disp_layer);
+    lv_obj_set_size(this->_app_panel_layer, 128, 64);
+    lv_obj_align(this->_app_panel_layer, LV_ALIGN_CENTER, 0, 0);
+
+    lv_group_add_obj(this->_button_group, this->_app_select_layer);
+    
     //------------------------------注册软件------------------------------
-    app_sys_info sys_info;
+    app_sys_info sys_info(this->_cfg->disp_width, this->_cfg->disp_height);
     this->app_register((info_ui_app_base*)&sys_info);
     
-    app_music music;
+    app_music music(this->_cfg->disp_width, this->_cfg->disp_height);
     this->app_register((info_ui_app_base*)&music);
+
+    app_imu imu(this->_cfg->disp_width, this->_cfg->disp_height);
+    this->app_register((info_ui_app_base*)&imu);
+
+    app_temperature temperature(this->_cfg->disp_width, this->_cfg->disp_height);
+    this->app_register((info_ui_app_base*)&temperature);
 }
 
 /*
@@ -173,6 +204,12 @@ void info_ui::dropdown_info() {
     lvgl_port_unlock();
 }
 
+void info_ui::start() {
+    lvgl_port_lock(0);
+    lv_obj_move_foreground(this->_app_select_layer);
+    lvgl_port_unlock();
+}
+
 /*
  * @brief               放在主循环中,做标志位的处理
  * @return              无
@@ -182,62 +219,8 @@ void info_ui::update() {
             // TODO:tbd
             lvgl_port_unlock();
         }
+        vTaskDelay(pdMS_TO_TICKS(1));
 }
-
-extern "C" void info_ui::test_button_input() {
-    lvgl_port_lock(0);
-
-    LV_IMG_DECLARE(icon_message);
-    
-    LV_IMG_DECLARE(icon_chat);
-
-    LV_IMG_DECLARE(icon_voice);
-
-    LV_IMG_DECLARE(icon_windows);
-
-    
-    void* img_src[] = {
-        (void*)&icon_message,
-        (void*)&icon_chat,
-        (void*)&icon_voice,
-        (void*)&icon_windows,
-    };
-
-    lv_obj_t* panel = lv_obj_create(this->_disp_layer);
-    lv_obj_set_size(panel, 128, 64);
-    lv_obj_set_scroll_snap_x(panel, LV_SCROLL_SNAP_CENTER);
-    lv_obj_set_scrollbar_mode(panel, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_set_flex_flow(panel, LV_FLEX_FLOW_ROW);
-    lv_obj_set_flex_align(panel, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
-    lv_obj_align(panel, LV_ALIGN_CENTER, 0, 0);
-
-    static lv_style_t style_focused;
-    lv_style_init(&style_focused);
-    lv_style_set_border_width(&style_focused, 1);
-    lv_style_set_border_color(&style_focused, lv_color_hex(0));
-    lv_style_set_border_post(&style_focused, true);
-    lv_style_set_radius(&style_focused, 10);
-
-
-    for (int i = 0; i < 4; ++i) {
-        lv_obj_t* btn = lv_btn_create(panel);
-        lv_obj_set_size(btn, 60, 60);
-        lv_obj_center(btn);
-        lv_obj_add_style(btn, &style_focused, LV_STATE_FOCUSED);
-
-        lv_obj_t* img = lv_img_create(btn);
-        lv_img_set_src(img, img_src[i]);
-        lv_obj_set_size(img, 56, 56);
-        lv_obj_align(img, LV_ALIGN_CENTER, 0, 0);
-
-        lv_group_add_obj(this->_button_group, btn);
-    }
-    lv_obj_update_snap(panel, LV_ANIM_ON);
-
-     
-    lvgl_port_unlock();
-}
-
 
 void info_ui::app_register(info_ui_app_base* app) {
     lvgl_port_lock(0);
@@ -246,6 +229,10 @@ void info_ui::app_register(info_ui_app_base* app) {
     lv_obj_set_size(btn, 60, 60);
     lv_obj_center(btn);
     lv_obj_add_style(btn, &_app_selected_style, LV_STATE_FOCUSED);
+    
+    lv_obj_add_flag(btn, LV_OBJ_FLAG_CLICKABLE);
+
+    lv_obj_add_event_cb(btn, app_selected_button_cb, LV_EVENT_ALL, app);
 
     //------------------------------添加图标------------------------------
     lv_obj_t* icon = lv_img_create(btn);
@@ -254,11 +241,16 @@ void info_ui::app_register(info_ui_app_base* app) {
     lv_obj_align(icon, LV_ALIGN_CENTER, 0, 0);
     lv_group_add_obj(this->_button_group, btn);
 
+
     //------------------------------注册面板------------------------------
-    app->panel_register(this->_app_select_layer);
+    app->panel_register(this->_app_panel_layer);
+
+    //------------------------------注册弹窗标签------------------------------
+    app->info_lable_register(this->_info_label);
 
     //------------------------------刷新面板------------------------------
     lv_obj_update_snap(this->_app_select_layer, LV_ANIM_ON);
+
     lvgl_port_unlock();
 }
 
