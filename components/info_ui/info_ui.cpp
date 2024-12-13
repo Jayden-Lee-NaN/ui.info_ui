@@ -29,14 +29,19 @@ static info_ui_app_load_fsm _app_load_fsm = INFO_UI_APP_DEFAULT;  // app加载FS
 
 static void app_selected_button_cb(lv_event_t* e) {
     lv_event_code_t code = lv_event_get_code(e);
+
     //------------------------------在主页面做的事------------------------------
-    
     if (_sys_page == INFO_UI_PAGE_HOME) {
         if (code == LV_EVENT_CLICKED) {
             _app_running = lv_event_get_user_data(e);  
             _app_load_fsm = INFO_UI_APP_LOADING;
         }
     }
+    //------------------------------在用户页面做的事------------------------------
+    else if (_sys_page == INFO_UI_PAGE_APP) {
+        
+    }
+
 }
 
 
@@ -252,11 +257,13 @@ void info_ui::app_register(info_ui_app_base* app) {
  */
 void info_ui::update() {
         if (lvgl_port_lock(0)) {
+            info_ui_app_base* app = (info_ui_app_base*)_app_running;
+
+            //------------------------------在主界面的状态机------------------------------
             if (_sys_page == INFO_UI_PAGE_HOME) {
+                //------------------------------app加载中------------------------------
                 if (_app_load_fsm == INFO_UI_APP_LOADING) {
-                    info_ui_app_base* app = (info_ui_app_base*)_app_running;
                     if (app->is_app_available()) {
-                        _app_load_fsm = INFO_UI_APP_LOAD_FINISH;
                         _sys_page = INFO_UI_PAGE_APP;
                         app->entry();
                     }
@@ -265,7 +272,21 @@ void info_ui::update() {
                         _app_load_fsm = INFO_UI_APP_LOAD_ERROR; 
                     }
                 }
+                //------------------------------app加载失败------------------------------
+                else if (_app_load_fsm == INFO_UI_APP_LOAD_ERROR) {
+
+                }
             }
+            //------------------------------在用户页面的状态机------------------------------
+            else if (_sys_page == INFO_UI_PAGE_APP) {
+                if (_app_load_fsm == INFO_UI_APP_LOADING) {
+                    if (app->is_app_load_finish()) {
+                        _app_load_fsm = INFO_UI_APP_LOAD_FINISH;
+                        app->run();
+                    }
+                }
+            }
+
             lvgl_port_unlock();
         }
         vTaskDelay(pdMS_TO_TICKS(1));
