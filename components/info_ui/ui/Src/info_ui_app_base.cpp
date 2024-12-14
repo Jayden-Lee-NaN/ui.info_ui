@@ -28,8 +28,6 @@ void info_ui_app_base::entry() {
 void info_ui_app_base::popup_info(std::string info) {
     lvgl_port_lock(0);
 
-    printf("popup_info");
-
     //------------------------------设置文字------------------------------
     lv_label_set_text(this->_app_info_label, info.c_str());
 

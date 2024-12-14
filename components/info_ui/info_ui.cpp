@@ -16,6 +16,7 @@
 #include "app_music.h"
 #include "app_imu.h"
 #include "app_temperature.h"
+#include "lvgl__lvgl/src/core/lv_obj_tree.h"
 
 namespace info_ui {
 
@@ -264,13 +265,14 @@ void info_ui::update() {
             if (_sys_page == INFO_UI_PAGE_HOME) {
                 //------------------------------app加载中------------------------------
                 if (_app_load_fsm == INFO_UI_APP_LOADING) {
-                    if (app->is_app_available()) {
+                    if (app->is_app_available() == true) {
                         _sys_page = INFO_UI_PAGE_APP;
+                        app = (app_sys_info*)_app_running;
                         app->entry();
                     }
                     else {
-                        printf("Hello World");
-                        app->popup_info("No app");
+                        // app->popup_info("No app");
+                        this->popup_info("No app");
                         _app_load_fsm = INFO_UI_APP_LOAD_ERROR; 
                     }
                 }
