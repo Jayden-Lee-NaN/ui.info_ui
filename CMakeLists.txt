@@ -4,4 +4,4 @@ cmake_minimum_required(VERSION 3.16)
 set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
 
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
-project(InfoUI)
+project(121402_InfoUI)

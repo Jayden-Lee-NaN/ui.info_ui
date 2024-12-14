@@ -1,5 +1,13 @@
 .cache/*
 .vscode/*
+.devcontainer/*
 build/*
 managed_components/*
 debug/*
+CMakeFiles/*
+config/*
+CMakeCache.txt
+config.env
+kconfigs.in
+kconfigs_projbuild.in
+

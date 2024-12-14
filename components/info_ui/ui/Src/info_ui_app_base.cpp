@@ -13,17 +13,22 @@ static void timer_cb_load_scr(lv_timer_t* timer) {
 }
 
 void info_ui_app_base::entry() {
-    // lv_obj_move_foreground(this->_app_panel);
+    lvgl_port_lock(0);
+    lv_obj_move_foreground(this->_app_panel);
 
     // 500ms的动画,当前屏幕向下滑出,新屏幕从上滑入
     lv_scr_load_anim(this->_app_panel, LV_SCR_LOAD_ANIM_MOVE_BOTTOM, 500, 0, false);
 
+    
     // 用定时器去监测软件是否被加载完成
     lv_timer_create(timer_cb_load_scr, 100, (void*)this);
+    lvgl_port_unlock();
 }
 
 void info_ui_app_base::popup_info(std::string info) {
     lvgl_port_lock(0);
+
+    printf("popup_info");
 
     //------------------------------设置文字------------------------------
     lv_label_set_text(this->_app_info_label, info.c_str());

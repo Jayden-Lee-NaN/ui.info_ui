@@ -148,16 +148,19 @@ info_ui::info_ui(info_ui_config_t* cfg, int32_t button_prev_num, int32_t button_
     //------------------------------注册软件------------------------------
     app_sys_info sys_info(this->_cfg->disp_width, this->_cfg->disp_height);
     this->app_register((info_ui_app_base*)&sys_info);
+    sys_info.app_enable();
     
     app_music music(this->_cfg->disp_width, this->_cfg->disp_height);
     this->app_register((info_ui_app_base*)&music);
+    music.app_disable();
 
     app_imu imu(this->_cfg->disp_width, this->_cfg->disp_height);
     this->app_register((info_ui_app_base*)&imu);
+    imu.app_disable();
 
     app_temperature temperature(this->_cfg->disp_width, this->_cfg->disp_height);
     this->app_register((info_ui_app_base*)&temperature);
-
+    temperature.app_disable();
 }
 
 /*
@@ -166,9 +169,7 @@ info_ui::info_ui(info_ui_config_t* cfg, int32_t button_prev_num, int32_t button_
  * @return              无
  */
 void info_ui::popup_info(std::string info) {
-
     lvgl_port_lock(0);
-
     //------------------------------设置文字------------------------------
     lv_label_set_text(this->_info_label, info.c_str());
 
@@ -215,6 +216,7 @@ void info_ui::dropdown_info() {
 void info_ui::start() {
     lvgl_port_lock(0);
     lv_obj_move_foreground(this->_app_select_layer);
+    // lv_obj_move_foreground(this->_app_panel_layer);
     lvgl_port_unlock();
 }
 
@@ -247,7 +249,6 @@ void info_ui::app_register(info_ui_app_base* app) {
 
     //------------------------------刷新面板------------------------------
     lv_obj_update_snap(this->_app_select_layer, LV_ANIM_ON);
-
     lvgl_port_unlock();
 }
 
@@ -268,6 +269,7 @@ void info_ui::update() {
                         app->entry();
                     }
                     else {
+                        printf("Hello World");
                         app->popup_info("No app");
                         _app_load_fsm = INFO_UI_APP_LOAD_ERROR; 
                     }

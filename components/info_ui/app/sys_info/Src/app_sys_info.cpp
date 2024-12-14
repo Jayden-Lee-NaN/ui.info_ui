@@ -23,6 +23,6 @@ extern "C" info_ui::app_sys_info::app_sys_info(uint32_t disp_width, uint32_t dis
 }
 
 void info_ui::app_sys_info::run() {
-    this->_app_available_flag = true;    
+    printf("Hello SysInfo");
 }
 
