@@ -12,6 +12,7 @@
 #include "core/lv_obj_scroll.h"
 #include "esp_lvgl_port_button.h"
 #include "extra/widgets/imgbtn/lv_imgbtn.h"
+#include "info_ui_app_registry.h"
 #include "app_sys_info.h"
 #include "app_music.h"
 #include "app_imu.h"
@@ -23,6 +24,21 @@ namespace info_ui {
 static lv_style_t           _app_selected_style;    // 软件图标被选择的样式
 //------------------------------当前所在的页面------------------------------
 static info_ui_page         _sys_page = INFO_UI_PAGE_HOME;      // 系统当前所在的页面
+
+
+//------------------------------软件注册宏------------------------------
+#define REGISTER_APP(class_name, app_name) \
+    static info_ui_app_base* create_##class_name() { \
+        return new class_name(128, 64); \
+    }\
+    static bool class_name##_registered = \
+        info_ui_app_registry::get_instance().register_app(app_name, create_##class_name);
+
+//------------------------------注册软件------------------------------
+REGISTER_APP(app_sys_info, "app_sys_info");             
+REGISTER_APP(app_music, "app_music");
+REGISTER_APP(app_imu, "app_imu");
+REGISTER_APP(app_temperature, "app_temperature");
 
 //------------------------------当前所运行的软件------------------------------
 static void*                _app_running = NULL;   // 正在运行的app指针
@@ -146,7 +162,9 @@ info_ui::info_ui(info_ui_config_t* cfg, int32_t button_prev_num, int32_t button_
     lv_obj_set_size(this->_app_panel_layer, 128, 64);
     lv_obj_align(this->_app_panel_layer, LV_ALIGN_CENTER, 0, 0);
 
-    //------------------------------注册软件------------------------------
+    
+
+    /*
     app_sys_info sys_info(this->_cfg->disp_width, this->_cfg->disp_height);
     this->app_register((info_ui_app_base*)&sys_info);
     sys_info.app_enable();
@@ -162,6 +180,7 @@ info_ui::info_ui(info_ui_config_t* cfg, int32_t button_prev_num, int32_t button_
     app_temperature temperature(this->_cfg->disp_width, this->_cfg->disp_height);
     this->app_register((info_ui_app_base*)&temperature);
     temperature.app_disable();
+    */
 }
 
 /*
@@ -267,7 +286,7 @@ void info_ui::update() {
                 if (_app_load_fsm == INFO_UI_APP_LOADING) {
                     if (app->is_app_available() == true) {
                         _sys_page = INFO_UI_PAGE_APP;
-                        app = (app_sys_info*)_app_running;
+                        // app = (app_sys_info*)_app_running;
                         app->entry();
                     }
                     else {

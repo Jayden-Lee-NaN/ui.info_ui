@@ -5,7 +5,12 @@
 //------------------------------------------------------------
 #include "app_temperature.h"
 
-extern "C" info_ui::app_temperature::app_temperature(uint32_t disp_width, uint32_t disp_height) {
+namespace info_ui {
+
+extern "C" app_temperature::app_temperature(uint32_t disp_width, uint32_t disp_height) {
+    //------------------------------声明软件名称------------------------------
+    this->_app_name = "app_temperature";
+
     //------------------------------挂载信息------------------------------
     this->_disp_width = disp_width;
     this->_disp_height = disp_height;
@@ -17,6 +22,19 @@ extern "C" info_ui::app_temperature::app_temperature(uint32_t disp_width, uint32
     this->_icon_src = (void*)&icon_temperature;
 }
 
-void info_ui::app_temperature::run() {
-    this->_app_available_flag = true;
+
+void app_temperature::init(lv_obj_t* disp_layer, lv_obj_t* sys_popup_label) {
+    this->_app_panel = lv_obj_create(disp_layer);
+    this->_app_info_label = sys_popup_label;
+    this->_app_state = info_ui_app_state::INIT;
+}
+
+void app_temperature::run() {
+    printf("run app_temperature\n");
+}
+
+void app_temperature::stop() {
+    printf("stop app_temperature\n");
+}
+
 }

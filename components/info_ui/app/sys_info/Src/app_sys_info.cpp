@@ -6,7 +6,12 @@
 
 #include "app_sys_info.h"
 
-extern "C" info_ui::app_sys_info::app_sys_info(uint32_t disp_width, uint32_t disp_height) {
+namespace info_ui {
+
+extern "C" app_sys_info::app_sys_info(uint32_t disp_width, uint32_t disp_height) {
+    //------------------------------声明软件名称------------------------------
+    this->_app_name = "app_sys_info";
+
     //------------------------------挂载信息------------------------------
     this->_disp_width = disp_width;
     this->_disp_height = disp_height;
@@ -22,7 +27,19 @@ extern "C" info_ui::app_sys_info::app_sys_info(uint32_t disp_width, uint32_t dis
     this->_author_img = (void*)&icon_jayden_lee;
 }
 
-void info_ui::app_sys_info::run() {
-    printf("Hello SysInfo");
+
+void app_sys_info::init(lv_obj_t* disp_layer, lv_obj_t* sys_popup_label) {
+    this->_app_panel = lv_obj_create(disp_layer);
+    this->_app_info_label = sys_popup_label;
+    this->_app_state = info_ui_app_state::INIT;
 }
 
+void app_sys_info::run() {
+    printf("run app_sys_info\n");
+}
+
+void app_sys_info::stop() {
+    printf("stop app_sys_info\n");
+}
+
+}

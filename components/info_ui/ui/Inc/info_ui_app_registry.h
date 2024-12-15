@@ -6,6 +6,7 @@
 
 namespace info_ui {
 
+
 class info_ui_app_registry {
 public:
     static const uint32_t app_max_val = 64;
@@ -25,9 +26,9 @@ public:
     //------------------------------创建应用实例------------------------------
     info_ui_app_base* create_app(std::string app_name);
 
-private:
-    info_ui_app_registry();         // 禁止外部构造
-    ~info_ui_app_registry();        // 禁止外部拷贝构造
+public:
+    info_ui_app_registry() = default;         
+    ~info_ui_app_registry() = default;        
     // 禁止外部拷贝构造
     info_ui_app_registry(const info_ui_app_registry &app_registry) = delete;
     // 禁止外部赋值操作
@@ -38,12 +39,4 @@ private:
     create_app_func         _app_creators[info_ui_app_registry::app_max_val];
     uint32_t                _app_count = 0;
 };
-
-// 简化注册的宏
-#define REGISTER_APP(class_name, app_name) \
-    static info_ui_app_base* create_##class_name() { \
-        return new class_name(); \
-    }\
-    static bool class_name##_registered = \
-        app_registry::get_instance().register_app(app_name, create_##class_name);
 }

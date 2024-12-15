@@ -1,3 +1,4 @@
+set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
 file(GLOB UI_SOURCES 
     "ui/Src/*.cpp"
     "ui/Src/*.c"
@@ -43,4 +44,3 @@ idf_component_register(
         "app/temperature/Inc"
         "."
 )
-set(CMAKE_EXPORT_COMPILE_COMMANDS 1)

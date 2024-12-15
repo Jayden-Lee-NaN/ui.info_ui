@@ -6,6 +6,8 @@ namespace info_ui {
 class app_music : public info_ui_app_base{
 public: 
     app_music(uint32_t disp_width, uint32_t disp_height);
+    void init(lv_obj_t* disp_layer, lv_obj_t* sys_popup_label) override;
     void run() override;
+    void stop() override;
 }; 
 }
