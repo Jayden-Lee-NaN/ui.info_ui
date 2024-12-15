@@ -39,5 +39,11 @@ private:
     uint32_t                _app_count = 0;
 };
 
+// 简化注册的宏
+#define REGISTER_APP(class_name, app_name) \
+    static info_ui_app_base* create_##class_name() { \
+        return new class_name(); \
+    }\
+    static bool class_name##_registered = \
+        app_registry::get_instance().register_app(app_name, create_##class_name);
 }
-
