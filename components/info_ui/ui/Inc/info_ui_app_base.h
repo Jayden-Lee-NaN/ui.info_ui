@@ -28,6 +28,7 @@ public:
     //------------------------------获取参数相关------------------------------
     void* get_icon_img() { return this->_icon_src; }
     lv_obj_t* get_app_panel() { return this->_app_panel; }
+    std::string get_app_name() { return this->_app_name; }
 
     //------------------------------状态设置相关------------------------------
     void set_app_load_finish() { this->_app_load_finish_flag = true; }
@@ -45,7 +46,7 @@ public:
     //------------------------------软件运行相关------------------------------
     void entry();
 
-    virtual void init(lv_obj_t* disp_layer, lv_obj_t* sys_popup_label) = 0;
+    virtual void init(lv_obj_t* disp_layer, lv_obj_t* sys_popup_label, lv_group_t* button_group) = 0;
     virtual void run() = 0;
     virtual void stop() = 0;
     void exit();
@@ -63,6 +64,7 @@ protected:
     info_ui_app_state   _app_state = info_ui_app_state::DEFAULT;
                                                         // 软件运行的状态
     std::string         _app_name = "unknown";          // 软件名称
+    lv_group_t*         _button_group;                  // 按键组
 };
 
 }

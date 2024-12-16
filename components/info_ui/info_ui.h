@@ -28,7 +28,6 @@ public:
     void dropdown_info();
     void start();
     void update();
-    void test_button_input();
     ~info_ui(void);
 private:
     void app_register(info_ui_app_base* app);

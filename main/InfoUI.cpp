@@ -43,16 +43,6 @@ void test_lvgl_demo_ui(lv_disp_t* disp) {
     lv_obj_align(label, LV_ALIGN_CENTER, 0, 0);
 }
 
-static void button_49_cb(void* arg, void* usr_data) {
-    info_ui::info_ui* ui = (info_ui::info_ui*)usr_data;
-    ui->popup_info("Hello World");
-}
-
-static void button_37_cb(void* arg, void* usr_data) {
-    info_ui::info_ui* ui = (info_ui::info_ui*)usr_data;
-    ui->popup_info("Hello JaydenLee");
-}
-
 extern "C" void app_main(void)
 {
     //------------------------------I2C配置------------------------------
@@ -131,7 +121,8 @@ extern "C" void app_main(void)
     ui.start();
 
     while (1) {
-        ui.update();
+        // ui.update();
+        vTaskDelay(pdMS_TO_TICKS(1));
     }
 
 }

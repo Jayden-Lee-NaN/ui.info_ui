@@ -25,6 +25,7 @@ static lv_style_t           _app_selected_style;    // 软件图标被选择的�
 //------------------------------当前所在的页面------------------------------
 static info_ui_page         _sys_page = INFO_UI_PAGE_HOME;      // 系统当前所在的页面
 
+lv_obj_t* app_select_panel = NULL;
 
 //------------------------------软件注册宏------------------------------
 #define REGISTER_APP(class_name, app_name) \
@@ -50,8 +51,31 @@ static void app_selected_button_cb(lv_event_t* e) {
     //------------------------------在主页面做的事------------------------------
     if (_sys_page == INFO_UI_PAGE_HOME) {
         if (code == LV_EVENT_CLICKED) {
-            _app_running = lv_event_get_user_data(e);  
-            _app_load_fsm = INFO_UI_APP_LOADING;
+            info_ui_app_base* _app = (info_ui_app_base*)lv_event_get_user_data(e);
+            _sys_page = INFO_UI_PAGE_APP;
+            if (_app->get_app_name() == "app_sys_info") {
+                app_sys_info* app = static_cast<app_sys_info*>(_app);
+                lv_obj_add_flag(app_select_panel, LV_OBJ_FLAG_HIDDEN);
+                app->run();
+            }
+            else if (_app->get_app_name() == "app_temperature") {
+                app_temperature* app = static_cast<app_temperature*>(_app);
+                lv_obj_add_flag(app_select_panel, LV_OBJ_FLAG_HIDDEN);
+                app->run();
+            }
+            else if (_app->get_app_name() == "app_imu") {
+                app_imu* app = static_cast<app_imu*>(_app);
+                lv_obj_add_flag(app_select_panel, LV_OBJ_FLAG_HIDDEN);
+                app->run();
+            }
+            else if (_app->get_app_name() == "app_music") {
+                app_music* app = static_cast<app_music*>(_app);
+                lv_obj_add_flag(app_select_panel, LV_OBJ_FLAG_HIDDEN);
+                app->run();
+            }
+            else {
+                _sys_page = INFO_UI_PAGE_HOME;
+            }
         }
     }
     //------------------------------在用户页面做的事------------------------------
@@ -150,6 +174,9 @@ info_ui::info_ui(info_ui_config_t* cfg, int32_t button_prev_num, int32_t button_
     lv_obj_set_flex_align(this->_app_select_layer, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
     lv_obj_align(this->_app_select_layer, LV_ALIGN_CENTER, 0, 0);
 
+    //------------------------------不优雅的设计------------------------------
+    app_select_panel = this->_app_select_layer;
+
     //------------------------------配置软件被选择后的样式------------------------------
     lv_style_init(&_app_selected_style);
     lv_style_set_border_width(&_app_selected_style, 1);
@@ -161,26 +188,34 @@ info_ui::info_ui(info_ui_config_t* cfg, int32_t button_prev_num, int32_t button_
     this->_app_panel_layer = lv_obj_create(this->_disp_layer);
     lv_obj_set_size(this->_app_panel_layer, 128, 64);
     lv_obj_align(this->_app_panel_layer, LV_ALIGN_CENTER, 0, 0);
+    lv_obj_add_flag(this->_app_panel_layer, LV_OBJ_FLAG_HIDDEN);
 
-    
+    //------------------------------初始化app------------------------------
+    // 初始化sys_info
+    app_sys_info* sys_info = static_cast<app_sys_info*>(info_ui_app_registry::get_instance().create_app("app_sys_info"));
+    if (sys_info) {
+        sys_info->init(this->_app_panel_layer, this->_info_label, this->_button_group);
+        sys_info->set_indev(this->_button_handle);
+        this->app_register((info_ui_app_base*)sys_info);
+    }
 
-    /*
-    app_sys_info sys_info(this->_cfg->disp_width, this->_cfg->disp_height);
-    this->app_register((info_ui_app_base*)&sys_info);
-    sys_info.app_enable();
-    
-    app_music music(this->_cfg->disp_width, this->_cfg->disp_height);
-    this->app_register((info_ui_app_base*)&music);
-    music.app_disable();
+    app_music* music = static_cast<app_music*>(info_ui_app_registry::get_instance().create_app("app_music"));
+    if (music) {
+        music->init(this->_app_panel_layer, this->_info_label, this->_button_group);
+        this->app_register((info_ui_app_base*)music);
+    }
 
-    app_imu imu(this->_cfg->disp_width, this->_cfg->disp_height);
-    this->app_register((info_ui_app_base*)&imu);
-    imu.app_disable();
+    app_imu* imu = static_cast<app_imu*>(info_ui_app_registry::get_instance().create_app("app_imu"));
+    if (imu) {
+        imu->init(this->_app_panel_layer, this->_info_label, this->_button_group);
+        this->app_register((info_ui_app_base*)imu);
+    }
 
-    app_temperature temperature(this->_cfg->disp_width, this->_cfg->disp_height);
-    this->app_register((info_ui_app_base*)&temperature);
-    temperature.app_disable();
-    */
+    app_temperature* temperature = static_cast<app_temperature*>(info_ui_app_registry::get_instance().create_app("app_temperature"));
+    if (temperature) {
+        temperature->init(this->_app_panel_layer, this->_info_label, this->_button_group);
+        this->app_register((info_ui_app_base*)temperature);
+    }
 }
 
 /*
@@ -260,17 +295,11 @@ void info_ui::app_register(info_ui_app_base* app) {
     lv_obj_align(icon, LV_ALIGN_CENTER, 0, 0);
     lv_group_add_obj(this->_button_group, btn);
 
-
-    //------------------------------注册面板------------------------------
-    app->panel_register(this->_app_panel_layer);
-
-    //------------------------------注册弹窗标签------------------------------
-    app->info_lable_register(this->_info_label);
-
     //------------------------------刷新面板------------------------------
     lv_obj_update_snap(this->_app_select_layer, LV_ANIM_ON);
     lvgl_port_unlock();
 }
+
 
 /*
  * @brief               放在主循环中,做标志位的处理
@@ -278,38 +307,7 @@ void info_ui::app_register(info_ui_app_base* app) {
  */
 void info_ui::update() {
         if (lvgl_port_lock(0)) {
-            info_ui_app_base* app = (info_ui_app_base*)_app_running;
-
-            //------------------------------在主界面的状态机------------------------------
-            if (_sys_page == INFO_UI_PAGE_HOME) {
-                //------------------------------app加载中------------------------------
-                if (_app_load_fsm == INFO_UI_APP_LOADING) {
-                    if (app->is_app_available() == true) {
-                        _sys_page = INFO_UI_PAGE_APP;
-                        // app = (app_sys_info*)_app_running;
-                        app->entry();
-                    }
-                    else {
-                        // app->popup_info("No app");
-                        this->popup_info("No app");
-                        _app_load_fsm = INFO_UI_APP_LOAD_ERROR; 
-                    }
-                }
-                //------------------------------app加载失败------------------------------
-                else if (_app_load_fsm == INFO_UI_APP_LOAD_ERROR) {
-
-                }
-            }
-            //------------------------------在用户页面的状态机------------------------------
-            else if (_sys_page == INFO_UI_PAGE_APP) {
-                if (_app_load_fsm == INFO_UI_APP_LOADING) {
-                    if (app->is_app_load_finish()) {
-                        _app_load_fsm = INFO_UI_APP_LOAD_FINISH;
-                        app->run();
-                    }
-                }
-            }
-
+                        
             lvgl_port_unlock();
         }
         vTaskDelay(pdMS_TO_TICKS(1));

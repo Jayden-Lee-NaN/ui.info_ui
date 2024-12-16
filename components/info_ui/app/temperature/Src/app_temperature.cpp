@@ -23,18 +23,24 @@ extern "C" app_temperature::app_temperature(uint32_t disp_width, uint32_t disp_h
 }
 
 
-void app_temperature::init(lv_obj_t* disp_layer, lv_obj_t* sys_popup_label) {
+void app_temperature::init(lv_obj_t* disp_layer, lv_obj_t* sys_popup_label, lv_group_t* button_group) {
     this->_app_panel = lv_obj_create(disp_layer);
+    lv_obj_add_flag(this->_app_panel, LV_OBJ_FLAG_HIDDEN);
+
     this->_app_info_label = sys_popup_label;
     this->_app_state = info_ui_app_state::INIT;
 }
 
 void app_temperature::run() {
     printf("run app_temperature\n");
+    this->_app_state = info_ui_app_state::RUNNING;
+
+    lv_obj_clear_flag(this->_app_panel, LV_OBJ_FLAG_HIDDEN);
 }
 
 void app_temperature::stop() {
     printf("stop app_temperature\n");
+    this->_app_state = info_ui_app_state::STOPPED;
 }
 
 }

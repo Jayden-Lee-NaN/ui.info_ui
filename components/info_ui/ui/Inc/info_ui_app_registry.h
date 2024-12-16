@@ -3,9 +3,7 @@
 #include <string>
 #include <list>
 
-
 namespace info_ui {
-
 
 class info_ui_app_registry {
 public:
