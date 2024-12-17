@@ -121,7 +121,7 @@ extern "C" void app_main(void)
     ui.start();
 
     while (1) {
-        // ui.update();
+        ui.update();
         vTaskDelay(pdMS_TO_TICKS(1));
     }
 

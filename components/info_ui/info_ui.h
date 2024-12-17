@@ -13,12 +13,6 @@ enum info_ui_page {
     INFO_UI_PAGE_APP,                           // 软件页面
 };
 
-enum info_ui_app_load_fsm {
-    INFO_UI_APP_DEFAULT,                        // 默认状态
-    INFO_UI_APP_LOADING,                        // 正在加载app
-    INFO_UI_APP_LOAD_FINISH,                    // app加载完成
-    INFO_UI_APP_LOAD_ERROR,                     // app加载错误
-};
 
 class info_ui {
 public:
@@ -31,8 +25,8 @@ public:
     ~info_ui(void);
 private:
     void app_register(info_ui_app_base* app);
-    void app_id_distribute();
-
+    void disply_app_select_layer();
+    void hiden_app_select_layer();
 
 public:
 

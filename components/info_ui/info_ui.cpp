@@ -42,7 +42,6 @@ REGISTER_APP(app_temperature, "app_temperature");
 
 //------------------------------当前所运行的软件------------------------------
 static void*                _app_running = NULL;   // 正在运行的app指针
-static info_ui_app_load_fsm _app_load_fsm = INFO_UI_APP_DEFAULT;  // app加载FSM
 
 static void app_selected_button_cb(lv_event_t* e) {
     lv_event_code_t code = lv_event_get_code(e);
@@ -55,21 +54,25 @@ static void app_selected_button_cb(lv_event_t* e) {
             app_sys_info* app = static_cast<app_sys_info*>(_app);
             lv_obj_add_flag(app_select_panel, LV_OBJ_FLAG_HIDDEN);
             app->run();
+            _app_running = (void*)_app;
         }
         else if (_app->get_app_name() == "app_temperature") {
             app_temperature* app = static_cast<app_temperature*>(_app);
             lv_obj_add_flag(app_select_panel, LV_OBJ_FLAG_HIDDEN);
             app->run();
+            _app_running = (void*)_app;
         }
         else if (_app->get_app_name() == "app_imu") {
             app_imu* app = static_cast<app_imu*>(_app);
             lv_obj_add_flag(app_select_panel, LV_OBJ_FLAG_HIDDEN);
             app->run();
+            _app_running = (void*)_app;
         }
         else if (_app->get_app_name() == "app_music") {
             app_music* app = static_cast<app_music*>(_app);
             lv_obj_add_flag(app_select_panel, LV_OBJ_FLAG_HIDDEN);
             app->run();
+            _app_running = (void*)_app;
         }
     }
 
@@ -187,9 +190,6 @@ info_ui::info_ui(info_ui_config_t* cfg, int32_t button_prev_num, int32_t button_
     app_sys_info* sys_info = static_cast<app_sys_info*>(info_ui_app_registry::get_instance().create_app("app_sys_info"));
     if (sys_info) {
         sys_info->init(this->_app_panel_layer, this->_info_label, this->_button_handle);
-        sys_info->set_indev(this->_button_handle);
-        sys_info->add_buttons(&btns);
-
         this->app_register((info_ui_app_base*)sys_info);
     }
 
@@ -296,6 +296,15 @@ void info_ui::app_register(info_ui_app_base* app) {
     lvgl_port_unlock();
 }
 
+void info_ui::disply_app_select_layer() {
+    lv_obj_clear_flag(this->_app_select_layer, LV_OBJ_FLAG_HIDDEN);
+    lv_indev_set_group(this->_button_handle, this->_button_group);
+    lv_obj_move_foreground(this->_app_select_layer);
+}
+
+void info_ui::hiden_app_select_layer() {
+
+}
 
 /*
  * @brief               放在主循环中,做标志位的处理
@@ -303,7 +312,13 @@ void info_ui::app_register(info_ui_app_base* app) {
  */
 void info_ui::update() {
         if (lvgl_port_lock(0)) {
-                        
+            if (_app_running != NULL) {
+                if (((info_ui_app_base*)_app_running)->get_app_state() == info_ui_app_state::STOPPED) {
+                    ((info_ui_app_base*)_app_running)->exit();              // 退出app
+                    this->disply_app_select_layer();
+                    _app_running = NULL;
+                }
+            }
             lvgl_port_unlock();
         }
         vTaskDelay(pdMS_TO_TICKS(1));

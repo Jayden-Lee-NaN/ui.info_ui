@@ -39,6 +39,7 @@ public:
     virtual void init(lv_obj_t* disp_layer, lv_obj_t* sys_popup_label, lv_indev_t* encoder_indev) = 0;
     virtual void run() = 0;
     virtual void stop() = 0;
+    void exit() { this->_app_state = info_ui_app_state::DEFAULT; }
 
     //------------------------------系统提示相关------------------------------
     void popup_info(std::string info);                  // 弹窗信息
