@@ -22,10 +22,10 @@
 namespace info_ui {
 
 static lv_style_t           _app_selected_style;    // 软件图标被选择的样式
-//------------------------------当前所在的页面------------------------------
+//------------------------------当前所在的页面------------------------------ 
 static info_ui_page         _sys_page = INFO_UI_PAGE_HOME;      // 系统当前所在的页面
-
 lv_obj_t* app_select_panel = NULL;
+lv_obj_t* app_panel = NULL;
 
 //------------------------------软件注册宏------------------------------
 #define REGISTER_APP(class_name, app_name) \
@@ -56,6 +56,8 @@ static void app_selected_button_cb(lv_event_t* e) {
             if (_app->get_app_name() == "app_sys_info") {
                 app_sys_info* app = static_cast<app_sys_info*>(_app);
                 lv_obj_add_flag(app_select_panel, LV_OBJ_FLAG_HIDDEN);
+                lv_obj_clear_flag(app_panel, LV_OBJ_FLAG_HIDDEN);
+                lv_obj_move_foreground(app_panel);
                 app->run();
             }
             else if (_app->get_app_name() == "app_temperature") {
@@ -87,6 +89,7 @@ static void app_selected_button_cb(lv_event_t* e) {
 
 
 info_ui::info_ui(info_ui_config_t* cfg, int32_t button_prev_num, int32_t button_next_num, int32_t button_enter_num) {
+    lvgl_port_lock(0);
     //------------------------------挂载数据------------------------------
     this->_cfg = cfg;    
 
@@ -150,6 +153,7 @@ info_ui::info_ui(info_ui_config_t* cfg, int32_t button_prev_num, int32_t button_
     this->_button_handle = lvgl_port_add_navigation_buttons(&btns);
 
     this->_button_group = lv_group_create();
+
     lv_indev_set_group(this->_button_handle, this->_button_group);
 
     //------------------------------获取屏幕------------------------------
@@ -176,6 +180,7 @@ info_ui::info_ui(info_ui_config_t* cfg, int32_t button_prev_num, int32_t button_
 
     //------------------------------不优雅的设计------------------------------
     app_select_panel = this->_app_select_layer;
+    
 
     //------------------------------配置软件被选择后的样式------------------------------
     lv_style_init(&_app_selected_style);
@@ -190,12 +195,15 @@ info_ui::info_ui(info_ui_config_t* cfg, int32_t button_prev_num, int32_t button_
     lv_obj_align(this->_app_panel_layer, LV_ALIGN_CENTER, 0, 0);
     lv_obj_add_flag(this->_app_panel_layer, LV_OBJ_FLAG_HIDDEN);
 
+    app_panel = this->_app_panel_layer;
     //------------------------------初始化app------------------------------
     // 初始化sys_info
     app_sys_info* sys_info = static_cast<app_sys_info*>(info_ui_app_registry::get_instance().create_app("app_sys_info"));
     if (sys_info) {
         sys_info->init(this->_app_panel_layer, this->_info_label, this->_button_group);
         sys_info->set_indev(this->_button_handle);
+        sys_info->add_buttons(&btns);
+
         this->app_register((info_ui_app_base*)sys_info);
     }
 
@@ -216,6 +224,10 @@ info_ui::info_ui(info_ui_config_t* cfg, int32_t button_prev_num, int32_t button_
         temperature->init(this->_app_panel_layer, this->_info_label, this->_button_group);
         this->app_register((info_ui_app_base*)temperature);
     }
+
+    //------------------------------加载软件起始页面------------------------------
+    // lv_scr_load(this->_app_select_layer);
+    lvgl_port_unlock();
 }
 
 /*
