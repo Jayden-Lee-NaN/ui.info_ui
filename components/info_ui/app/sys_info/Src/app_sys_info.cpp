@@ -77,7 +77,7 @@ void app_sys_info::run() {
     this->_encoder_group_enable();
     lv_obj_t* exit_btn = lv_btn_create(this->_app_panel);
     lv_obj_set_size(exit_btn, 1, 1);
-    lv_obj_align(exit_btn, LV_ALIGN_TOP_MID, 0, -10);
+    lv_obj_align(exit_btn, LV_ALIGN_TOP_RIGHT, 0, 0);
     lv_group_add_obj(this->_encoder_group, exit_btn);
     lv_obj_add_flag(exit_btn, LV_OBJ_FLAG_CLICKABLE);
     lv_obj_add_event_cb(exit_btn, app_sys_info_button_cb, LV_EVENT_CLICKED, this);
