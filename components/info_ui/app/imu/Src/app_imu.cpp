@@ -22,12 +22,22 @@ extern "C" app_imu::app_imu(uint32_t disp_width, uint32_t disp_height) {
     this->_icon_src = (void*)&icon_imu;
 }
 
-void app_imu::init(lv_obj_t* disp_layer, lv_obj_t* sys_popup_label, lv_group_t* button_group) {
+void app_imu::init(lv_obj_t* disp_layer, lv_obj_t* sys_popup_label, lv_indev_t* encoder_indev) {
+    //------------------------------创建屏幕------------------------------
     this->_app_panel = lv_obj_create(disp_layer);
     lv_obj_add_flag(this->_app_panel, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_set_size(this->_app_panel, this->_disp_width, this->_disp_height);
 
+    //------------------------------配置弹窗面板------------------------------
     this->_app_info_label = sys_popup_label;
+
+    //------------------------------添加编码器------------------------------
+    this->_encoder_indev = encoder_indev;
+    this->_encoder_group = lv_group_create();
+
+    //------------------------------配置状态信息------------------------------
     this->_app_state = info_ui_app_state::INIT;
+
 }
 
 void app_imu::run () {

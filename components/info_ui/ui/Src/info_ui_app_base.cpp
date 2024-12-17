@@ -1,4 +1,6 @@
 #include "info_ui_app_base.h"
+#include "core/lv_group.h"
+#include "lv_api_map.h"
 namespace info_ui {
 
 void info_ui_app_base::popup_info(std::string info) {
@@ -41,6 +43,26 @@ void info_ui_app_base::dropdown_info() {
     //------------------------------启动动画------------------------------
     lv_anim_start(&anim);
     lvgl_port_unlock();
+}
+
+void info_ui_app_base::_hidden_layer() {
+    auto info_ui_app_panel = lv_obj_get_parent(this->_app_panel);
+    lv_obj_add_flag(info_ui_app_panel, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_add_flag(this->_app_panel, LV_OBJ_FLAG_HIDDEN);
+}
+
+void info_ui_app_base::_display_layer() {
+    auto info_ui_app_panel = lv_obj_get_parent(this->_app_panel);
+    lv_obj_clear_flag(info_ui_app_panel, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_clear_flag(this->_app_panel, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_move_foreground(info_ui_app_panel);
+}
+
+void info_ui_app_base::_encoder_group_enable() {
+    //------------------------------如果没有创建组的话创建一个组------------------------------
+    if (this->_encoder_group == NULL) 
+        this->_encoder_group = lv_group_create();
+    lv_indev_set_group(this->_encoder_indev, this->_encoder_group);
 }
 
 }

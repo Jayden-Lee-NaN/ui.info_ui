@@ -25,7 +25,6 @@ static lv_style_t           _app_selected_style;    // 软件图标被选择的�
 //------------------------------当前所在的页面------------------------------ 
 static info_ui_page         _sys_page = INFO_UI_PAGE_HOME;      // 系统当前所在的页面
 lv_obj_t* app_select_panel = NULL;
-lv_obj_t* app_panel = NULL;
 
 //------------------------------软件注册宏------------------------------
 #define REGISTER_APP(class_name, app_name) \
@@ -48,45 +47,33 @@ static info_ui_app_load_fsm _app_load_fsm = INFO_UI_APP_DEFAULT;  // app加载FS
 static void app_selected_button_cb(lv_event_t* e) {
     lv_event_code_t code = lv_event_get_code(e);
 
-    //------------------------------在主页面做的事------------------------------
-    if (_sys_page == INFO_UI_PAGE_HOME) {
-        if (code == LV_EVENT_CLICKED) {
-            info_ui_app_base* _app = (info_ui_app_base*)lv_event_get_user_data(e);
-            _sys_page = INFO_UI_PAGE_APP;
-            if (_app->get_app_name() == "app_sys_info") {
-                app_sys_info* app = static_cast<app_sys_info*>(_app);
-                lv_obj_add_flag(app_select_panel, LV_OBJ_FLAG_HIDDEN);
-                lv_obj_clear_flag(app_panel, LV_OBJ_FLAG_HIDDEN);
-                lv_obj_move_foreground(app_panel);
-                app->run();
-            }
-            else if (_app->get_app_name() == "app_temperature") {
-                app_temperature* app = static_cast<app_temperature*>(_app);
-                lv_obj_add_flag(app_select_panel, LV_OBJ_FLAG_HIDDEN);
-                app->run();
-            }
-            else if (_app->get_app_name() == "app_imu") {
-                app_imu* app = static_cast<app_imu*>(_app);
-                lv_obj_add_flag(app_select_panel, LV_OBJ_FLAG_HIDDEN);
-                app->run();
-            }
-            else if (_app->get_app_name() == "app_music") {
-                app_music* app = static_cast<app_music*>(_app);
-                lv_obj_add_flag(app_select_panel, LV_OBJ_FLAG_HIDDEN);
-                app->run();
-            }
-            else {
-                _sys_page = INFO_UI_PAGE_HOME;
-            }
+    //------------------------------进入应用------------------------------
+    if (code == LV_EVENT_CLICKED) {
+        info_ui_app_base* _app = (info_ui_app_base*)lv_event_get_user_data(e);
+        _sys_page = INFO_UI_PAGE_APP;
+        if (_app->get_app_name() == "app_sys_info") {
+            app_sys_info* app = static_cast<app_sys_info*>(_app);
+            lv_obj_add_flag(app_select_panel, LV_OBJ_FLAG_HIDDEN);
+            app->run();
         }
-    }
-    //------------------------------在用户页面做的事------------------------------
-    else if (_sys_page == INFO_UI_PAGE_APP) {
-        
+        else if (_app->get_app_name() == "app_temperature") {
+            app_temperature* app = static_cast<app_temperature*>(_app);
+            lv_obj_add_flag(app_select_panel, LV_OBJ_FLAG_HIDDEN);
+            app->run();
+        }
+        else if (_app->get_app_name() == "app_imu") {
+            app_imu* app = static_cast<app_imu*>(_app);
+            lv_obj_add_flag(app_select_panel, LV_OBJ_FLAG_HIDDEN);
+            app->run();
+        }
+        else if (_app->get_app_name() == "app_music") {
+            app_music* app = static_cast<app_music*>(_app);
+            lv_obj_add_flag(app_select_panel, LV_OBJ_FLAG_HIDDEN);
+            app->run();
+        }
     }
 
 }
-
 
 info_ui::info_ui(info_ui_config_t* cfg, int32_t button_prev_num, int32_t button_next_num, int32_t button_enter_num) {
     lvgl_port_lock(0);
@@ -195,12 +182,11 @@ info_ui::info_ui(info_ui_config_t* cfg, int32_t button_prev_num, int32_t button_
     lv_obj_align(this->_app_panel_layer, LV_ALIGN_CENTER, 0, 0);
     lv_obj_add_flag(this->_app_panel_layer, LV_OBJ_FLAG_HIDDEN);
 
-    app_panel = this->_app_panel_layer;
     //------------------------------初始化app------------------------------
     // 初始化sys_info
     app_sys_info* sys_info = static_cast<app_sys_info*>(info_ui_app_registry::get_instance().create_app("app_sys_info"));
     if (sys_info) {
-        sys_info->init(this->_app_panel_layer, this->_info_label, this->_button_group);
+        sys_info->init(this->_app_panel_layer, this->_info_label, this->_button_handle);
         sys_info->set_indev(this->_button_handle);
         sys_info->add_buttons(&btns);
 
@@ -209,24 +195,22 @@ info_ui::info_ui(info_ui_config_t* cfg, int32_t button_prev_num, int32_t button_
 
     app_music* music = static_cast<app_music*>(info_ui_app_registry::get_instance().create_app("app_music"));
     if (music) {
-        music->init(this->_app_panel_layer, this->_info_label, this->_button_group);
+        music->init(this->_app_panel_layer, this->_info_label, this->_button_handle);
         this->app_register((info_ui_app_base*)music);
     }
 
     app_imu* imu = static_cast<app_imu*>(info_ui_app_registry::get_instance().create_app("app_imu"));
     if (imu) {
-        imu->init(this->_app_panel_layer, this->_info_label, this->_button_group);
+        imu->init(this->_app_panel_layer, this->_info_label, this->_button_handle);
         this->app_register((info_ui_app_base*)imu);
     }
 
     app_temperature* temperature = static_cast<app_temperature*>(info_ui_app_registry::get_instance().create_app("app_temperature"));
     if (temperature) {
-        temperature->init(this->_app_panel_layer, this->_info_label, this->_button_group);
+        temperature->init(this->_app_panel_layer, this->_info_label, this->_button_handle);
         this->app_register((info_ui_app_base*)temperature);
     }
 
-    //------------------------------加载软件起始页面------------------------------
-    // lv_scr_load(this->_app_select_layer);
     lvgl_port_unlock();
 }
 
