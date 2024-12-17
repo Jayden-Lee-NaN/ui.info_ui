@@ -182,6 +182,7 @@ info_ui::info_ui(info_ui_config_t* cfg, int32_t button_prev_num, int32_t button_
     //------------------------------配置软件面板层------------------------------
     this->_app_panel_layer = lv_obj_create(this->_disp_layer);
     lv_obj_set_size(this->_app_panel_layer, 128, 64);
+    lv_obj_set_scrollbar_mode(this->_app_panel_layer, LV_SCROLLBAR_MODE_OFF);
     lv_obj_align(this->_app_panel_layer, LV_ALIGN_CENTER, 0, 0);
     lv_obj_add_flag(this->_app_panel_layer, LV_OBJ_FLAG_HIDDEN);
 
