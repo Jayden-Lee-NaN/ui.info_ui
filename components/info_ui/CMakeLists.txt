@@ -19,6 +19,10 @@ file (GLOB APP_SOURCES
     "app/imu/Src/*.cpp"
     "app/temperature/Src/*.c"
     "app/temperature/Src/*.cpp"
+    "app/clock/Src/*.c"
+    "app/clock/Src/*.cpp"
+    "app/computer_controller/Src/*.c"
+    "app/computer_controller/Src/*.cpp"
 ) 
 
 file (GLOB APP_ICON
@@ -26,6 +30,8 @@ file (GLOB APP_ICON
     "app/music/Icon/*.c"
     "app/imu/Icon/*.c"
     "app/temperature/Icon/*.c"
+    "app/clock/Icon/*.c"
+    "app/computer_controller/Icon/*.c"
 )
 
 idf_component_register(
@@ -42,5 +48,9 @@ idf_component_register(
         "app/music/Inc"
         "app/imu/Inc"
         "app/temperature/Inc"
+        "app/clock/Inc"
+        "app/computer_controller/Inc"
         "."
+    REQUIRES
+        esp_wifi
 )

@@ -17,6 +17,8 @@
 #include "app_music.h"
 #include "app_imu.h"
 #include "app_temperature.h"
+#include "app_clock.h"
+#include "app_computer_controller.h"
 #include "lvgl__lvgl/src/core/lv_obj_tree.h"
 
 namespace info_ui {
@@ -39,6 +41,9 @@ REGISTER_APP(app_sys_info, "app_sys_info");
 REGISTER_APP(app_music, "app_music");
 REGISTER_APP(app_imu, "app_imu");
 REGISTER_APP(app_temperature, "app_temperature");
+REGISTER_APP(app_clock, "app_clock");
+REGISTER_APP(app_computer_controller, "app_computer_controller");
+
 
 //------------------------------当前所运行的软件------------------------------
 static void*                _app_running = NULL;   // 正在运行的app指针
@@ -70,6 +75,18 @@ static void app_selected_button_cb(lv_event_t* e) {
         }
         else if (_app->get_app_name() == "app_music") {
             app_music* app = static_cast<app_music*>(_app);
+            lv_obj_add_flag(app_select_panel, LV_OBJ_FLAG_HIDDEN);
+            app->run();
+            _app_running = (void*)_app;
+        }
+        else if (_app->get_app_name() == "app_clock") {
+            app_clock* app = static_cast<app_clock*>(_app);
+            lv_obj_add_flag(app_select_panel, LV_OBJ_FLAG_HIDDEN);
+            app->run();
+            _app_running = (void*)_app;
+        }
+        else if (_app->get_app_name() == "app_computer_controller") {
+            app_computer_controller* app = static_cast<app_computer_controller*>(_app);
             lv_obj_add_flag(app_select_panel, LV_OBJ_FLAG_HIDDEN);
             app->run();
             _app_running = (void*)_app;
@@ -210,6 +227,18 @@ info_ui::info_ui(info_ui_config_t* cfg, int32_t button_prev_num, int32_t button_
     if (temperature) {
         temperature->init(this->_app_panel_layer, this->_info_label, this->_button_handle);
         this->app_register((info_ui_app_base*)temperature);
+    }
+
+    app_clock* clock = static_cast<app_clock*>(info_ui_app_registry::get_instance().create_app("app_clock"));
+    if (clock) {
+        clock->init(this->_app_panel_layer, this->_info_label, this->_button_handle);
+        this->app_register((info_ui_app_base*)clock);
+    }
+
+    app_computer_controller* computer_controller = static_cast<app_computer_controller*>(info_ui_app_registry::get_instance().create_app("app_computer_controller"));
+    if (computer_controller) {
+        computer_controller->init(this->_app_panel_layer, this->_info_label, this->_button_handle);
+        this->app_register((info_ui_app_base*)computer_controller);
     }
 
     lvgl_port_unlock();

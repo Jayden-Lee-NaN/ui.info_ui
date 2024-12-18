@@ -34,7 +34,6 @@ extern "C" app_sys_info::app_sys_info(uint32_t disp_width, uint32_t disp_height)
     //------------------------------获取图片------------------------------
     LV_IMG_DECLARE(icon_message);
     LV_IMG_DECLARE(icon_jayden_lee);
-    LV_IMG_DECLARE(fish);
 
     //------------------------------获取软件图标和软件面板------------------------------
     this->_icon_src = (void*)&icon_message;
@@ -67,7 +66,8 @@ void app_sys_info::init(lv_obj_t* disp_layer, lv_obj_t* sys_popup_label, lv_inde
 }
 
 void app_sys_info::run() {
-    lvgl_port_lock(0); printf("run app_sys_info\n");
+    lvgl_port_lock(0); 
+    printf("run app_sys_info\n");
     this->_app_state = info_ui_app_state::RUNNING;
 
     //------------------------------显示屏幕------------------------------
