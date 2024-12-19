@@ -15,7 +15,8 @@ static void app_computer_controller_button_cb(lv_event_t* e) {
     }
 }
 
-extern "C" app_computer_controller::app_computer_controller(uint32_t disp_width, uint32_t disp_height) {
+
+extern "C" app_computer_controller::app_computer_controller(uint32_t disp_width, uint32_t disp_height){
     //------------------------------声明软件名称------------------------------
     this->_app_name = "app_computer_controller";
 
@@ -30,7 +31,7 @@ extern "C" app_computer_controller::app_computer_controller(uint32_t disp_width,
     this->_icon_src = (void*)&icon_computer_controller;
 }
 
-void app_computer_controller::init(lv_obj_t* disp_layer, lv_obj_t* sys_popup_label, lv_indev_t* encoder_indev) {
+void app_computer_controller::init(lv_obj_t* disp_layer, lv_obj_t* sys_popup_label, lv_indev_t* encoder_indev) { 
     //------------------------------创建屏幕------------------------------
     this->_app_panel = lv_obj_create(disp_layer);
     lv_obj_add_flag(this->_app_panel, LV_OBJ_FLAG_HIDDEN);
@@ -44,6 +45,20 @@ void app_computer_controller::init(lv_obj_t* disp_layer, lv_obj_t* sys_popup_lab
     //------------------------------添加编码器------------------------------
     this->_encoder_indev = encoder_indev;
     this->_encoder_group = lv_group_create();
+
+    //------------------------------配置连接WI-FI面板------------------------------
+    this->_layer_connect_wifi = lv_obj_create(this->_app_panel);
+    lv_obj_add_flag(this->_layer_connect_wifi, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_set_size(this->_layer_connect_wifi, this->_disp_width, this->_disp_height);
+    lv_obj_align(this->_layer_connect_wifi, LV_ALIGN_CENTER, 0, 0);
+    lv_obj_set_scrollbar_mode(this->_layer_connect_wifi, LV_SCROLLBAR_MODE_OFF);
+
+    //------------------------------配置用户控制面板------------------------------
+    this->_layer_computer_control = lv_obj_create(this->_app_panel);
+    lv_obj_add_flag(this->_layer_computer_control, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_set_size(this->_layer_computer_control, this->_disp_width, this->_disp_height);
+    lv_obj_align(this->_layer_computer_control, LV_ALIGN_CENTER, 0, 0);
+    lv_obj_set_scrollbar_mode(this->_layer_computer_control, LV_SCROLLBAR_MODE_OFF);
 
     //------------------------------配置状态信息------------------------------
     this->_app_state = info_ui_app_state::INIT;
@@ -66,6 +81,26 @@ void app_computer_controller::stop() {
     printf("stop app_computer_controller\n");
     this->_app_state = info_ui_app_state::STOPPED;
     this->_hidden_layer();
+}
+
+
+void app_computer_controller::display_connect_wifi_layer() {
+    //------------------------------连接WI-FI------------------------------
+    this->_wifi->connect();
+    lv_obj_clear_flag(this->_layer_connect_wifi, LV_OBJ_FLAG_HIDDEN);
+    
+}
+
+void app_computer_controller::hidden_connect_wifi_layer() {
+
+}
+
+void app_computer_controller::display_computer_control_layer() {
+
+}
+
+void app_computer_controller::hidden_computer_control_layer() {
+
 }
 
 }

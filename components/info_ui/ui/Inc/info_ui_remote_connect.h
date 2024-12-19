@@ -11,9 +11,7 @@ namespace remote_connect {
 
 class tcp_socket {
 public:
-    tcp_socket() : _tcp_socket(-1), _tcp_is_connected(false) {
-        memset(&_tcp_dest_addr, 0, sizeof(_tcp_dest_addr));
-    }
+    tcp_socket();
     ~tcp_socket() {
         disconnect();
     }
@@ -31,12 +29,33 @@ public:
     int printf(const char* formart, ...);
     int send_data(const void* data, size_t len);
     int receive(void* buffer, size_t len, uint32_t timeout_ms = 0);
+
 private:
-    int32_t                     _tcp_socket;
-    bool                        _tcp_is_connected;
-    struct sockaddr_in          _tcp_dest_addr;
-    static const int32_t        _tcp_buffer_size = 1024;
-};
+    bool connect_and_wait(TickType_t timeout);                  
+    static void connect_task(void* pvParameters);
+    void do_connect();
+    
+private:
+    //------------------------------基本参数定义------------------------------
+    int32_t                     _tcp_socket;                    // tcp的socket号
+    bool                        _tcp_is_connected = false;      // tcp是否连接
+    struct sockaddr_in          _tcp_dest_addr;                 // 连接目标地址
+    static const int32_t        _tcp_buffer_size = 1024;        // tcp发送缓冲区大小
+
+    //------------------------------事件组定义------------------------------
+    EventGroupHandle_t          _tcp_event_group;               // tcp连接事件组
+    static constexpr uint32_t SOCKET_CONNECTED_BIT      = BIT0; // 判断socket连接的标志位
+    static constexpr uint32_t SOCKET_FAILED_BIT         = BIT1; // socket连接失败的标志位
+    static constexpr uint32_t SOCKET_DISCONNECTED_BIT   = BIT2; // socket未连接的标志位
+    static constexpr uint32_t SOCKET_ANY_BIT            = (SOCKET_CONNECTED_BIT | SOCKET_FAILED_BIT | SOCKET_DISCONNECTED_BIT);
+
+    //------------------------------socket重连配置------------------------------
+    struct {
+        uint32_t                retry_count = 5;
+        uint32_t                retry_interval = 1000;          // 重连间隔(ms)
+        uint32_t                connect_timeout = 5000;         // 连接超时(ms)
+    }cfg;
+}; 
 
 class wifi {
 public:
