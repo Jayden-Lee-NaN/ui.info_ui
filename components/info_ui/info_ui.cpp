@@ -19,6 +19,7 @@
 #include "app_temperature.h"
 #include "app_clock.h"
 #include "app_computer_controller.h"
+#include "info_ui_remote_connect.h"
 #include "lvgl__lvgl/src/core/lv_obj_tree.h"
 
 namespace info_ui {
@@ -95,7 +96,7 @@ static void app_selected_button_cb(lv_event_t* e) {
 
 }
 
-info_ui::info_ui(info_ui_config_t* cfg, int32_t button_prev_num, int32_t button_next_num, int32_t button_enter_num) {
+info_ui::info_ui(info_ui_config_t* cfg, int32_t button_prev_num, int32_t button_next_num, int32_t button_enter_num, remote_connect::wifi& wifi) : _wifi(wifi) {
     lvgl_port_lock(0);
     //------------------------------挂载数据------------------------------
     this->_cfg = cfg;    

@@ -14,9 +14,16 @@
 #include "misc/lv_area.h"
 #include "driver/gpio.h"
 #include "iot_button.h"
+#include "nvs_flash.h"
 
 //------------------------------LOG参数设置------------------------------
 static const char* TAG = "TEST";
+
+//------------------------------WI-FI参数设置------------------------------
+#define TEST_WIFI_SSID           "jayden-lee"
+#define TEST_WIFI_PASSWORD       "12345678"
+#define TEST_WIFI_SERVER_IP      "192.168.101.37"
+#define TEST_WIFI_SERVER_PORT    "8080"
 
 //------------------------------LCD参数设置------------------------------
 #define TEST_LCD_PIXEL_CLOCK_HZ     (400 * 1000)
@@ -45,6 +52,14 @@ void test_lvgl_demo_ui(lv_disp_t* disp) {
 
 extern "C" void app_main(void)
 {
+    //------------------------------启动nvs------------------------------
+    esp_err_t ret = nvs_flash_init();
+    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+        ESP_ERROR_CHECK(nvs_flash_erase());
+        ret = nvs_flash_init();
+    }
+    ESP_ERROR_CHECK(ret);
+
     //------------------------------I2C配置------------------------------
     ESP_LOGI(TAG, "Initialize I2C bus");
     i2c_config_t i2c_conf = {
@@ -110,6 +125,11 @@ extern "C" void app_main(void)
     lv_disp_t* disp = lvgl_port_add_disp(&disp_cfg);
     lv_disp_set_rotation(disp, LV_DISP_ROT_180);
 
+    //------------------------------添加WI-FI------------------------------
+    info_ui::remote_connect::wifi wifi(TEST_WIFI_SSID, TEST_WIFI_PASSWORD, TEST_WIFI_SERVER_IP, TEST_WIFI_SERVER_PORT);
+    wifi.init();
+    ESP_ERROR_CHECK(wifi.connect());
+
     //------------------------------初始化info ui------------------------------
     info_ui::info_ui_config_t info_ui_cfg = {
         .io_handle = io_handle,
@@ -117,12 +137,16 @@ extern "C" void app_main(void)
         .disp_width = TEST_LCD_V_RES,
         .disp_height = TEST_LCD_H_RES,
     };
-    info_ui::info_ui ui(&info_ui_cfg, 35, 40, 37);
-    ui.start();
+
+    // info_ui::info_ui ui(&info_ui_cfg, 35, 40, 37, wifi);
+    // ui.start();
 
     while (1) {
-        ui.update();
-        vTaskDelay(pdMS_TO_TICKS(1));
+        // ui.update();
+        if (wifi.is_connected()) {
+            wifi.printf("Hello World\n");
+        }
+        vTaskDelay(pdMS_TO_TICKS(1000));
     }
 
 }

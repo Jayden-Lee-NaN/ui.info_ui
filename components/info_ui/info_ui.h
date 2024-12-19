@@ -1,6 +1,7 @@
 #pragma once
 #include "info_ui_config.h"
 #include "info_ui_app_base.h"
+#include "info_ui_remote_connect.h"
 #include <string>
 #include <map>
 #include <functional>
@@ -16,7 +17,7 @@ enum info_ui_page {
 
 class info_ui {
 public:
-    info_ui(info_ui_config_t* cfg, int32_t button_prev_num, int32_t button_next_num, int32_t button_enter);
+    info_ui(info_ui_config_t* cfg, int32_t button_prev_num, int32_t button_next_num, int32_t button_enter, remote_connect::wifi& wifi);
 
     void popup_info(std::string info);
     void dropdown_info();
@@ -48,6 +49,7 @@ private:
     lv_obj_t*           _app_panel_layer;       // 软件层的头
 
     //------------------------------系统维护------------------------------
+    remote_connect::wifi& _wifi;
     
 };
 
