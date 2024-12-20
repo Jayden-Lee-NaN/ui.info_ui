@@ -69,7 +69,7 @@ void wifi::init() {
 
 esp_err_t wifi::connect() {
     //------------------------------配置WI-FI参数------------------------------
-    wifi_config_t cfg;
+    wifi_config_t cfg = {};
     strcpy((char*)cfg.sta.ssid, this->_wifi_ssid.c_str());
     strcpy((char*)cfg.sta.password, this->_wifi_password.c_str());
 

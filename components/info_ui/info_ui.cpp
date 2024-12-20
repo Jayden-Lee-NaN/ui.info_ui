@@ -241,8 +241,8 @@ info_ui::info_ui(info_ui_config_t* cfg, int32_t button_prev_num, int32_t button_
 
     app_computer_controller* computer_controller = static_cast<app_computer_controller*>(info_ui_app_registry::get_instance().create_app("app_computer_controller"));
     if (computer_controller) {
-        computer_controller->init(this->_app_panel_layer, this->_info_label, this->_button_handle);
         computer_controller->set_wifi(&this->_wifi);
+        computer_controller->init(this->_app_panel_layer, this->_info_label, this->_button_handle);
         this->app_register((info_ui_app_base*)computer_controller);
     }
 

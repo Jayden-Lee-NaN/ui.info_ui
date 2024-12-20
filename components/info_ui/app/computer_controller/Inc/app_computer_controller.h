@@ -23,12 +23,20 @@ private:
     void hidden_connect_wifi_layer();
     void display_computer_control_layer();
     void hidden_computer_control_layer();
-
+    void display_loading_anim();
+    static void wifi_connect_task(void* pvParameters);
+    static void display_computer_control_layer_task(void* pvParameters);
 private:
     remote_connect::wifi*   _wifi;
     bool                    _wifi_is_set = false;
     lv_obj_t*               _layer_connect_wifi;
     lv_obj_t*               _layer_computer_control;
+    void*                   _picture_wifi_find;
+    //------------------------------事件组定义------------------------------
+    EventGroupHandle_t      _wifi_connect_event_group;
+    static constexpr uint32_t _WIFI_CONNECTED_BIT = BIT0;
+    static constexpr uint32_t _WIFI_FAILED_BIT = BIT1;
+    static constexpr uint32_t _WIFI_ANY_BIT = (_WIFI_CONNECTED_BIT | _WIFI_FAILED_BIT);
 };
 
 }

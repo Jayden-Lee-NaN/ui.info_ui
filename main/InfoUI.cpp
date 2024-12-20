@@ -127,8 +127,9 @@ extern "C" void app_main(void)
 
     //------------------------------添加WI-FI------------------------------
     info_ui::remote_connect::wifi wifi(TEST_WIFI_SSID, TEST_WIFI_PASSWORD, TEST_WIFI_SERVER_IP, TEST_WIFI_SERVER_PORT);
-    wifi.init();
-    ESP_ERROR_CHECK(wifi.connect());
+    // wifi.init();
+    // vTaskDelay(pdMS_TO_TICKS(1000));
+    // ESP_ERROR_CHECK(wifi.connect());
 
     //------------------------------初始化info ui------------------------------
     info_ui::info_ui_config_t info_ui_cfg = {
@@ -138,15 +139,12 @@ extern "C" void app_main(void)
         .disp_height = TEST_LCD_H_RES,
     };
 
-    // info_ui::info_ui ui(&info_ui_cfg, 35, 40, 37, wifi);
-    // ui.start();
+    info_ui::info_ui ui(&info_ui_cfg, 35, 40, 37, wifi);
+    ui.start();
 
     while (1) {
-        // ui.update();
-        if (wifi.is_connected()) {
-            wifi.printf("Hello World\n");
-        }
-        vTaskDelay(pdMS_TO_TICKS(1000));
+        ui.update();
+        vTaskDelay(pdMS_TO_TICKS(1));
     }
 
 }
