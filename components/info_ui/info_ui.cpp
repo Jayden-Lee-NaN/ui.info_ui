@@ -332,9 +332,11 @@ void info_ui::app_register(info_ui_app_base* app) {
 }
 
 void info_ui::disply_app_select_layer() {
+    lvgl_port_lock(0);
     lv_obj_clear_flag(this->_app_select_layer, LV_OBJ_FLAG_HIDDEN);
     lv_indev_set_group(this->_button_handle, this->_button_group);
     lv_obj_move_foreground(this->_app_select_layer);
+    lvgl_port_unlock();
 }
 
 void info_ui::hiden_app_select_layer() {

@@ -23,7 +23,7 @@ static const char* TAG = "TEST";
 #define TEST_WIFI_SSID           "jayden-lee"
 #define TEST_WIFI_PASSWORD       "12345678"
 #define TEST_WIFI_SERVER_IP      "192.168.101.37"
-#define TEST_WIFI_SERVER_PORT    "8080"
+#define TEST_WIFI_SERVER_PORT    "1502"
 
 //------------------------------LCD参数设置------------------------------
 #define TEST_LCD_PIXEL_CLOCK_HZ     (400 * 1000)

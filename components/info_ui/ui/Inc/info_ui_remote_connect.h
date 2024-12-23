@@ -63,7 +63,8 @@ public:
     void        init(); 
     esp_err_t   connect();
     void        disconnect();
-    bool        is_connected() const { return this->_wifi_is_connected; }
+    bool        is_wifi_connected() const { return this->_wifi_is_connected; }
+    bool        is_socket_connected() const { return this->_wifi_tcp_socket.is_connected(); } 
     template<typename... Args>
     int         printf(const char* format, Args... args) { return this->_wifi_tcp_socket.printf(format, args...); }
 

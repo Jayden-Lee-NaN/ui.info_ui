@@ -10,10 +10,6 @@
 namespace info_ui {
 
 
-static void app_music_button_cb(lv_event_t* e) {
-    lv_event_code_t code = lv_event_get_code(e);
-}
-
 extern "C" app_music::app_music(uint32_t disp_width, uint32_t disp_height) {
     //------------------------------声明软件名称------------------------------
     this->_app_name = "app_music";
@@ -45,6 +41,7 @@ void app_music::init(lv_obj_t* disp_layer, lv_obj_t* sys_popup_label, lv_indev_t
 
     //------------------------------配置状态信息------------------------------
     this->_app_state = info_ui_app_state::INIT;
+
 }
 
 void app_music::run() {
